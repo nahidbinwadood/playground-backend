@@ -10,9 +10,15 @@ const DB_URL = envVars.DB_URL;
 
 const startServer = async () => {
   try {
-    console.info('🔄 Initializing server...');
-    await mongoose.connect(DB_URL);
-    console.info('✅ Database connection established successfully');
+    // Connect to DB in background (non-blocking) to speed up restarts
+    console.info('🔄 Database connection initiated...');
+    mongoose.connect(DB_URL)
+      .then(() => console.info('✅ Database connection established successfully'))
+      .catch((err) => {
+        console.error('❌ Database connection failed');
+        console.error(err);
+      });
+
     server = app.listen(PORT, () => {
       console.info(`🚀 Server started successfully`);
       console.info(`📡 Listening on port: ${PORT}`);

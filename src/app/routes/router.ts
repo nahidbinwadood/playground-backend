@@ -6,7 +6,7 @@ const router = Router();
 // declare all the routes=>
 const allRoutes = [
   {
-    path: '/user',
+    path: '/users',
     route: userRoutes,
   },
 ];

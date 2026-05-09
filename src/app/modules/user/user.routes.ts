@@ -1,16 +1,25 @@
-import { NextFunction, Request, Response, Router } from 'express';
-import sendResponse from '../../utils/sendResponse';
-import httpStatusCode from 'http-status-codes';
+import { Router } from 'express';
+import validateRequest from '../../middlewares/validateRequest';
+import { UserController } from './user.controller';
+import { createUserSchema, loginUserSchema } from './userSchema';
 
 const userRoutes = Router();
 
+// create user==>
+userRoutes.post(
+  '/create',
+  validateRequest(createUserSchema),
+  UserController.createUser
+);
+
 // get all users==>
-userRoutes.get('/', (req: Request, res: Response, next: NextFunction) => {
-  sendResponse(res, {
-    success: true,
-    statusCode: httpStatusCode.OK,
-    message: 'All user data retrieved successfully',
-  });
-});
+userRoutes.get('/', UserController.getAllUsers);
+
+// login ==>
+userRoutes.post(
+  '/login',
+  validateRequest(loginUserSchema),
+  UserController.loginUser
+);
 
 export default userRoutes;

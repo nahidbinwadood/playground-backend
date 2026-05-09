@@ -1,11 +1,14 @@
-import dotenv from 'dotenv';
+import { config } from 'dotenv';
 
-dotenv.config();
+config();
 
 interface IEnvVariables {
   PORT: string;
   DB_URL: string;
   NODE_ENV: 'development' | 'production';
+  BCRYPT_SALT_ROUND: string;
+  JWT_SECRET: string;
+  JWT_ACCESS_EXPIRES: string;
 }
 
 const loadEnvironmentVariables = (): IEnvVariables => {
@@ -13,6 +16,9 @@ const loadEnvironmentVariables = (): IEnvVariables => {
     'PORT',
     'DB_URL',
     'NODE_ENV',
+    'BCRYPT_SALT_ROUND',
+    'JWT_SECRET',
+    'JWT_ACCESS_EXPIRES',
   ];
 
   requiredVariables.forEach((key) => {
@@ -26,6 +32,9 @@ const loadEnvironmentVariables = (): IEnvVariables => {
     PORT: process.env.PORT as string,
     DB_URL: process.env.DB_URL as string,
     NODE_ENV: process.env.NODE_ENV as 'development' | 'production',
+    BCRYPT_SALT_ROUND: process.env.BCRYPT_SALT_ROUND as string,
+    JWT_SECRET: process.env.BCRYPT_SALT_ROUND as string,
+    JWT_ACCESS_EXPIRES: process.env.BCRYPT_SALT_ROUND as string,
   };
 };
 
