@@ -84,6 +84,18 @@ const getProfile = async (email: string) => {
   };
 };
 
+// update profile==>
+const updateProfile = async (userId: string, payload: Partial<IUser>) => {
+  const response = await User.findByIdAndUpdate(userId, payload, {
+    returnDocument: 'after',
+  });
+
+  if (response) {
+    const { password, ...updatedResponse } = response.toObject();
+    return updatedResponse;
+  }
+};
+
 // change password==>
 const changePassword = async (payload: {
   email: string;
@@ -148,4 +160,5 @@ export const AuthServices = {
   loginUser,
   getProfile,
   changePassword,
+  updateProfile,
 };

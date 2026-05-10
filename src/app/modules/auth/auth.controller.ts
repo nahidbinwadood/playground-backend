@@ -50,6 +50,22 @@ const getProfile = catchAsync(
   }
 );
 
+// update profile==>
+const updateProfile = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.user;
+    const payload = req.body;
+    const response = await AuthServices.updateProfile(userId, payload);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatusCode.OK,
+      message: 'Profile updated successfully',
+      data: response,
+    });
+  }
+);
+
 // change password==>
 const changePassword = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -89,4 +105,5 @@ export const AuthControllers = {
   getProfile,
   changePassword,
   logOut,
+  updateProfile,
 };

@@ -5,6 +5,7 @@ import {
   changePasswordSchema,
   createUserSchema,
   loginUserSchema,
+  updateUserSchema,
 } from '../user/userSchema';
 import checkAuth from '../../middlewares/checkAuth';
 
@@ -31,6 +32,14 @@ authRoutes.post('/logout', checkAuth(), AuthControllers.logOut);
 
 // get personal info==>
 authRoutes.get('/me', checkAuth(), AuthControllers.getProfile);
+
+// update profile==>
+authRoutes.patch(
+  '/me',
+  checkAuth(),
+  validateRequest(updateUserSchema),
+  AuthControllers.updateProfile
+);
 
 // change password==>
 authRoutes.post(
