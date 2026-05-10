@@ -33,3 +33,14 @@ export const loginUserSchema = z.object({
     .min(8, 'Password must be at least 8 characters long')
     .max(50, 'Password cannot exceed 50 characters'),
 });
+
+export const changePasswordSchema = z.object({
+  oldPassword: z
+    .string('Old Password is required')
+    .min(8, 'Old Password must be at least 8 characters long')
+    .max(50, 'Old Password cannot exceed 50 characters'),
+  newPassword: z
+    .string('New Password is required')
+    .min(8, 'New Password must be at least 8 characters long')
+    .max(50, 'New Password cannot exceed 50 characters'),
+});

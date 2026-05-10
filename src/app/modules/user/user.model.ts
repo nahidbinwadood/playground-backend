@@ -1,5 +1,14 @@
 import { model, Schema } from 'mongoose';
-import { IUser, USER_ROLE } from './user.interface';
+import { IsActive, IUser, USER_ROLE } from './user.interface';
+
+const schemaTransform = {
+  virtuals: true,
+  transform: (_: any, ret: any) => {
+    ret.id = ret._id;
+    delete ret._id;
+    delete ret.__v;
+  },
+};
 
 const userSchema = new Schema<IUser>(
   {
@@ -10,10 +19,18 @@ const userSchema = new Schema<IUser>(
       type: String,
       enum: USER_ROLE,
     },
+    isActive: {
+      type: String,
+      enum: Object.values(IsActive),
+      default: IsActive.ACTIVE,
+    },
+    isDeleted: { type: Boolean, default: false },
   },
   {
     timestamps: true,
     versionKey: false,
+    toJSON: schemaTransform,
+    toObject: schemaTransform,
   }
 );
 

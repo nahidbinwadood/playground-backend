@@ -1,16 +1,26 @@
 import { Router } from 'express';
 import userRoutes from '../modules/user/user.routes';
+import authRoutes from '../modules/auth/auth.route';
+
+interface IRoutes {
+  path: string;
+  route: Router;
+}
 
 const router = Router();
 
 // declare all the routes=>
-const allRoutes = [
+const moduleRoutes: IRoutes[] = [
+  {
+    path: '/auth',
+    route: authRoutes,
+  },
   {
     path: '/users',
     route: userRoutes,
   },
 ];
 
-allRoutes?.map((routes) => router.use(routes.path, routes.route));
+moduleRoutes?.map((routes) => router.use(routes.path, routes.route));
 
 export default router;

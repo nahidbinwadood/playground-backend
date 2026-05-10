@@ -1,25 +1,10 @@
 import { Router } from 'express';
-import validateRequest from '../../middlewares/validateRequest';
+import checkAuth from '../../middlewares/checkAuth';
 import { UserController } from './user.controller';
-import { createUserSchema, loginUserSchema } from './userSchema';
 
 const userRoutes = Router();
 
-// create user==>
-userRoutes.post(
-  '/create',
-  validateRequest(createUserSchema),
-  UserController.createUser
-);
-
 // get all users==>
-userRoutes.get('/', UserController.getAllUsers);
-
-// login ==>
-userRoutes.post(
-  '/login',
-  validateRequest(loginUserSchema),
-  UserController.loginUser
-);
+userRoutes.get('/get-all', checkAuth('admin'), UserController.getAllUsers);
 
 export default userRoutes;
