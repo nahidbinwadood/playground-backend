@@ -4,12 +4,14 @@ import httpStatusCode from 'http-status-codes';
 import { AppError } from '../errorHelpers/appError';
 import { ZodError } from 'zod';
 import jwt from 'jsonwebtoken';
+import envVars from '../config/env';
 
 interface IErrorResponse {
   success: false;
   statusCode: number;
   message: string;
   errors?: Record<string, any>;
+  stack?: string | null;
 }
 
 const globalErrorHandler = (
@@ -58,12 +60,14 @@ const globalErrorHandler = (
   else if (err instanceof jwt.TokenExpiredError) {
     statusCode = httpStatusCode.UNAUTHORIZED;
     message = 'Session has expired. Please login again';
+    errors = err;
   }
 
   // ========= JWT ERROR(Invalid Token)=============
   else if (err instanceof jwt.JsonWebTokenError) {
     statusCode = httpStatusCode.UNAUTHORIZED;
     message = 'Invalid token. Please login again.';
+    errors = err;
     console.log('✓ Handled as Invalid Token Error');
   }
 
@@ -115,6 +119,8 @@ const globalErrorHandler = (
     success: false,
     statusCode,
     message,
+    errors,
+    stack: envVars.NODE_ENV == 'development' ? err?.stack : null,
   };
 
   if (errors && Object.keys(errors).length > 0) {
