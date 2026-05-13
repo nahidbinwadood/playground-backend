@@ -1,4 +1,5 @@
 import { AppError } from '../../errorHelpers/appError';
+import { generateSlug } from '../../utils/generateSlug';
 import { IBlog } from './blog.interface';
 import { Blog } from './blog.model';
 import httpStatusCode from 'http-status-codes';
@@ -18,7 +19,27 @@ const createBlog = async (payload: Partial<IBlog>) => {
 };
 
 // update blog==>
-const updateBlog = async (blogId, payload) => {};
+const updateBlog = async (_id: string, payload: Partial<IBlog>) => {
+  // modify the slug==>
+  if (payload.title) {
+    payload.slug = generateSlug(payload.title);
+  }
+  const response = await Blog.findOneAndUpdate(
+    { _id },
+    { ...payload },
+    {
+      returnDocument: 'after',
+      runValidators: true,
+    }
+  );
+
+  // throw error if the response not found==>
+  if (!response) {
+    throw new AppError(httpStatusCode.NOT_FOUND, 'Blog not found');
+  }
+
+  return response;
+};
 
 // delete blog==>
 const deleteBlog = async (id: string) => {

@@ -2,9 +2,9 @@ import { Router } from 'express';
 import checkAuth from '../../middlewares/checkAuth';
 import { UserController } from './user.controller';
 
-const userRoutes = Router();
+const router = Router();
 
 // get all users==>
-userRoutes.get('/get-all', checkAuth('admin'), UserController.getAllUsers);
+router.get('/get-all', checkAuth('admin'), UserController.getAllUsers);
 
-export default userRoutes;
+export const userRoutes = router;

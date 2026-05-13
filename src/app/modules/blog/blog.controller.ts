@@ -36,7 +36,28 @@ const createBlog = catchAsync(
 
 // update blog==>
 const updateBlog = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {}
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+
+    // if the id is not available==>
+    if (!id || Array.isArray(id)) {
+      throw new AppError(httpStatusCode.NOT_FOUND, 'Blog is is required');
+    }
+
+    // if the id is invalid==>
+    if (!isValidObjectId(id)) {
+      throw new AppError(httpStatusCode.NOT_FOUND, 'Please enter a valid id');
+    }
+
+    const response = await BlogServices.updateBlog(id, req.body);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatusCode.OK,
+      message: 'Blog Has Been Updated Successfully',
+      data: response,
+    });
+  }
 );
 
 // delete blog==>

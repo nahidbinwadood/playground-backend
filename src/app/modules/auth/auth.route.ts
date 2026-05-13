@@ -9,32 +9,32 @@ import {
 } from '../user/userSchema';
 import checkAuth from '../../middlewares/checkAuth';
 
-const authRoutes = Router();
+const router = Router();
 
 // routes==>
 
 // register==>
-authRoutes.post(
+router.post(
   '/create',
   validateRequest(createUserSchema),
   AuthControllers.createUser
 );
 
 // login==>
-authRoutes.post(
+router.post(
   '/login',
   validateRequest(loginUserSchema),
   AuthControllers.loginUser
 );
 
 // logout==>
-authRoutes.post('/logout', checkAuth(), AuthControllers.logOut);
+router.post('/logout', checkAuth(), AuthControllers.logOut);
 
 // get personal info==>
-authRoutes.get('/me', checkAuth(), AuthControllers.getProfile);
+router.get('/me', checkAuth(), AuthControllers.getProfile);
 
 // update profile==>
-authRoutes.patch(
+router.patch(
   '/me',
   checkAuth(),
   validateRequest(updateUserSchema),
@@ -42,11 +42,11 @@ authRoutes.patch(
 );
 
 // change password==>
-authRoutes.post(
+router.post(
   '/change-password',
   validateRequest(changePasswordSchema),
   checkAuth(),
   AuthControllers.changePassword
 );
 
-export default authRoutes;
+export const authRoutes = router;

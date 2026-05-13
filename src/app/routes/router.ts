@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import userRoutes from '../modules/user/user.routes';
-import authRoutes from '../modules/auth/auth.route';
+import { userRoutes } from '../modules/user/user.routes';
 import { BlogRoutes } from '../modules/blog/blog.route';
+import { authRoutes } from '../modules/auth/auth.route';
 
 interface IRoutes {
   path: string;

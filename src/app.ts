@@ -5,12 +5,30 @@ import httpStatusCode from 'http-status-codes';
 import router from './app/routes/router';
 import notFound from './app/middlewares/notFound';
 import globalErrorHandler from './app/middlewares/globalErrorHandler';
+import envVars from './app/config/env';
+import { AppError } from './app/errorHelpers/appError';
 
 const app: Application = express();
 
+const allowedOrigins = [
+  envVars.FRONTEND_URL_LOCAL,
+  envVars.FRONTEND_URL_PRODUCTION,
+];
+
+const corsOptions = {
+  origin: (origin: string | undefined, callback: any) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new AppError(401, 'Now Allowed Origin'));
+    }
+  },
+  credentials: true,
+};
+
 // middlewares==>
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsOptions));
 
 // router==>
 app.use('/api/v1', router);
