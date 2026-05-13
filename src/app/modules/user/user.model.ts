@@ -5,8 +5,15 @@ const schemaTransform = {
   virtuals: true,
   transform: (_: any, ret: any) => {
     ret.id = ret._id;
-    delete ret._id;
-    delete ret.__v;
+    const transformed = {
+      id: ret._id,
+      ...ret,
+    };
+
+    delete transformed._id;
+    delete transformed._v;
+
+    return transformed;
   },
 };
 
@@ -17,7 +24,7 @@ const userSchema = new Schema<IUser>(
     password: { type: String },
     role: {
       type: String,
-      enum: USER_ROLE,
+      enum: Object.values(USER_ROLE),
     },
     isActive: {
       type: String,
