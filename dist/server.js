@@ -22,12 +22,8 @@ const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Connect to DB in background (non-blocking) to speed up restarts
         console.info('🔄 Database connection initiated...');
-        mongoose_1.default.connect(DB_URL)
-            .then(() => console.info('✅ Database connection established successfully'))
-            .catch((err) => {
-            console.error('❌ Database connection failed');
-            console.error(err);
-        });
+        yield mongoose_1.default.connect(DB_URL);
+        console.info('✅ Database connection established successfully');
         server = app_1.default.listen(PORT, () => {
             console.info(`🚀 Server started successfully`);
             console.info(`📡 Listening on port: ${PORT}`);

@@ -12,12 +12,8 @@ const startServer = async () => {
   try {
     // Connect to DB in background (non-blocking) to speed up restarts
     console.info('🔄 Database connection initiated...');
-    mongoose.connect(DB_URL)
-      .then(() => console.info('✅ Database connection established successfully'))
-      .catch((err) => {
-        console.error('❌ Database connection failed');
-        console.error(err);
-      });
+    await mongoose.connect(DB_URL);
+    console.info('✅ Database connection established successfully');
 
     server = app.listen(PORT, () => {
       console.info(`🚀 Server started successfully`);
