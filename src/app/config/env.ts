@@ -15,7 +15,7 @@ interface IEnvVariables {
   FRONTEND_URL_PRODUCTION: string;
 }
 
-const loadEnvironmentVariables = (): IEnvVariables => {
+export const loadEnvironmentVariables = (): IEnvVariables => {
   const requiredVariables: Array<keyof IEnvVariables> = [
     'PORT',
     'DB_URL',
@@ -49,7 +49,3 @@ const loadEnvironmentVariables = (): IEnvVariables => {
     FRONTEND_URL_PRODUCTION: process.env.FRONTEND_URL_PRODUCTION as string,
   };
 };
-
-const envVars = loadEnvironmentVariables();
-
-export default envVars;

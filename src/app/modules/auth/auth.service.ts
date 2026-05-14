@@ -3,8 +3,8 @@ import { IUser } from '../user/user.interface';
 import { User } from '../user/user.model';
 import httpStatusCode from 'http-status-codes';
 import bcrypt from 'bcryptjs';
-import envVars from '../../config/env';
 import { generateToken } from '../../utils/jwt';
+import { envVars } from '../../../app';
 
 // create user==>
 const createUser = async (payload: Partial<IUser>) => {
