@@ -3,19 +3,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
+exports.envVars = void 0;
 const cors_1 = __importDefault(require("cors"));
-const sendResponse_1 = __importDefault(require("./app/utils/sendResponse"));
+const express_1 = __importDefault(require("express"));
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
-const router_1 = __importDefault(require("./app/routes/router"));
-const notFound_1 = __importDefault(require("./app/middlewares/notFound"));
-const globalErrorHandler_1 = __importDefault(require("./app/middlewares/globalErrorHandler"));
-const env_1 = __importDefault(require("./app/config/env"));
+const env_1 = require("./app/config/env");
 const appError_1 = require("./app/errorHelpers/appError");
+const globalErrorHandler_1 = __importDefault(require("./app/middlewares/globalErrorHandler"));
+const notFound_1 = __importDefault(require("./app/middlewares/notFound"));
+const router_1 = __importDefault(require("./app/routes/router"));
+const sendResponse_1 = __importDefault(require("./app/utils/sendResponse"));
 const app = (0, express_1.default)();
+exports.envVars = (0, env_1.loadEnvironmentVariables)();
 const allowedOrigins = [
-    env_1.default.FRONTEND_URL_LOCAL,
-    env_1.default.FRONTEND_URL_PRODUCTION,
+    exports.envVars.FRONTEND_URL_LOCAL,
+    exports.envVars.FRONTEND_URL_PRODUCTION,
 ];
 const corsOptions = {
     origin: (origin, callback) => {

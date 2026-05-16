@@ -1,14 +1,16 @@
-import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
-import sendResponse from './app/utils/sendResponse';
+import express, { Application, Request, Response } from 'express';
 import httpStatusCode from 'http-status-codes';
-import router from './app/routes/router';
-import notFound from './app/middlewares/notFound';
-import globalErrorHandler from './app/middlewares/globalErrorHandler';
-import envVars from './app/config/env';
+import { loadEnvironmentVariables } from './app/config/env';
 import { AppError } from './app/errorHelpers/appError';
+import globalErrorHandler from './app/middlewares/globalErrorHandler';
+import notFound from './app/middlewares/notFound';
+import router from './app/routes/router';
+import sendResponse from './app/utils/sendResponse';
 
 const app: Application = express();
+
+export const envVars = loadEnvironmentVariables();
 
 const allowedOrigins = [
   envVars.FRONTEND_URL_LOCAL,

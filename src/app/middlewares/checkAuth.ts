@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
 import { verifyToken } from '../utils/jwt';
-import envVars from '../config/env';
 import { AppError } from '../errorHelpers/appError';
 import httpStatusCode from 'http-status-codes';
 import { User } from '../modules/user/user.model';
 import { JwtPayload } from 'jsonwebtoken';
 import { IsActive } from '../modules/user/user.interface';
+import { envVars } from '../../app';
 
 const checkAuth = (...authRoles: string[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {

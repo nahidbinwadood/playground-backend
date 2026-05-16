@@ -15,10 +15,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createNewAccessToken = exports.verifyToken = exports.generateToken = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const user_interface_1 = require("../modules/user/user.interface");
-const env_1 = __importDefault(require("../config/env"));
 const appError_1 = require("../errorHelpers/appError");
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const user_model_1 = require("../modules/user/user.model");
+const app_1 = require("../../app");
 const generateToken = (data) => {
     const payload = {
         userId: data === null || data === void 0 ? void 0 : data.id,
@@ -26,12 +26,12 @@ const generateToken = (data) => {
         role: data === null || data === void 0 ? void 0 : data.role,
     };
     // generate access token==>
-    const accessToken = jsonwebtoken_1.default.sign(payload, env_1.default.JWT_ACCESS_SECRET, {
-        expiresIn: env_1.default.JWT_ACCESS_EXPIRES,
+    const accessToken = jsonwebtoken_1.default.sign(payload, app_1.envVars.JWT_ACCESS_SECRET, {
+        expiresIn: app_1.envVars.JWT_ACCESS_EXPIRES,
     });
     // generate refresh token==>
-    const refreshToken = jsonwebtoken_1.default.sign(payload, env_1.default.JWT_REFRESH_SECRET, {
-        expiresIn: env_1.default.JWT_REFRESH_EXPIRES,
+    const refreshToken = jsonwebtoken_1.default.sign(payload, app_1.envVars.JWT_REFRESH_SECRET, {
+        expiresIn: app_1.envVars.JWT_REFRESH_EXPIRES,
     });
     return { accessToken, refreshToken };
 };
@@ -41,7 +41,7 @@ const verifyToken = (token, secret) => {
 };
 exports.verifyToken = verifyToken;
 const createNewAccessToken = (refreshToken) => __awaiter(void 0, void 0, void 0, function* () {
-    const isVerified = (0, exports.verifyToken)(refreshToken, env_1.default.JWT_REFRESH_SECRET);
+    const isVerified = (0, exports.verifyToken)(refreshToken, app_1.envVars.JWT_REFRESH_SECRET);
     // throw error if the access token is invalid==>
     if (!isVerified) {
         throw new appError_1.AppError(http_status_codes_1.default.BAD_REQUEST, 'Invalid Access Token');
