@@ -25,7 +25,7 @@ const checkAuth = (...authRoles: string[]) => {
         envVars.JWT_ACCESS_SECRET
       ) as JwtPayload;
 
-      const isUserExist = await User.findOne({ email: decodedToken?.email });
+      const isUserExist = await User.findOne({ _id: decodedToken?.userId });
 
       //throw error if the user doest not exist==>
       if (!isUserExist) {
