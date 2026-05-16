@@ -55,7 +55,8 @@ export const connectDB = async (dbUrl: string): Promise<void> => {
   console.error(`Error: ${lastError?.message}`);
   console.error(`Error Code: ${lastError?.code}`);
 
-  // Don't throw - let server start anyway so we can serve /health endpoint
+  // Throw so the caller can log and handle appropriately
+  throw new Error(`Database connection failed: ${lastError?.message ?? 'Unknown error'}`);
 };
 
 export const disconnectDB = async (): Promise<void> => {
@@ -78,3 +79,19 @@ export const getDBStatus = (): boolean => {
 export const setDBStatus = (status: boolean): void => {
   isDBConnected = status;
 };
+
+// Handle Atlas dropping idle connections (common on M0 free tier)
+mongoose.connection.on('disconnected', () => {
+  console.warn('⚠️ MongoDB disconnected. Will reconnect on next request.');
+  isDBConnected = false;
+});
+
+mongoose.connection.on('reconnected', () => {
+  console.info('✅ MongoDB reconnected successfully');
+  isDBConnected = true;
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('❌ MongoDB connection error:', err.message);
+  isDBConnected = false;
+});
