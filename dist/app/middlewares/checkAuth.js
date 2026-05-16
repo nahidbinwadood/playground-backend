@@ -28,7 +28,7 @@ const checkAuth = (...authRoles) => {
                 throw new appError_1.AppError(http_status_codes_1.default.UNAUTHORIZED, 'No authorization token found');
             }
             const decodedToken = (0, jwt_1.verifyToken)(token, app_1.envVars.JWT_ACCESS_SECRET);
-            const isUserExist = yield user_model_1.User.findOne({ email: decodedToken === null || decodedToken === void 0 ? void 0 : decodedToken.email });
+            const isUserExist = yield user_model_1.User.findOne({ _id: decodedToken === null || decodedToken === void 0 ? void 0 : decodedToken.userId });
             //throw error if the user doest not exist==>
             if (!isUserExist) {
                 throw new appError_1.AppError(http_status_codes_1.default.BAD_REQUEST, 'User doest not exist');

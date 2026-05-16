@@ -82,6 +82,7 @@ exports.updateUserSchema = z.object({
         .max(80, 'Name cannot exceed 80 characters')
         .optional(),
     role: z.enum(['admin', 'user'], 'Role must me admin or user').optional(),
+    email: z.string().optional(),
     isActive: z
         .enum(Object.values(user_interface_1.IsActive), `isActive must be between ${Object.values(user_interface_1.IsActive)}`)
         .optional(),
