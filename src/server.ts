@@ -1,7 +1,7 @@
 import { Server } from 'http';
 import mongoose from 'mongoose';
-import { loadEnvironmentVariables } from './app/config/env';
 import app from './app';
+import { loadEnvironmentVariables } from './app/config/env';
 
 let server: Server;
 

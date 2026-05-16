@@ -7,7 +7,8 @@ import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import notFound from './app/middlewares/notFound';
 import router from './app/routes/router';
 import sendResponse from './app/utils/sendResponse';
-import { getDBStatus } from './connectDB';
+import { connectDB, getDBStatus } from './app/db/connectDB';
+import envVars from './server';
 
 const app: Application = express();
 
@@ -27,9 +28,6 @@ const app: Application = express();
 //   credentials: true,
 // };
 
-const variables = loadEnvironmentVariables();
-console.log({ variables });
-
 // middlewares==>
 app.use(express.json());
 app.use(cors());
@@ -38,12 +36,13 @@ app.use(cors());
 app.use('/api/v1', checkDBConnection, router);
 
 // base route==>
-app.get('/', (req: Request, res: Response) => {
+app.get('/', async (req: Request, res: Response) => {
+  const connectDb = await connectDB(envVars.DB_URL);
   sendResponse(res, {
     success: true,
     statusCode: httpStatusCode.OK,
     message: 'The playground server is running',
-    data: variables,
+    data: connectDb,
   });
 });
 
