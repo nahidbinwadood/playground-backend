@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { BlogStatus } from './blog.interface';
+import { BlogStatus, BlogTypes } from './blog.interface';
 
 export const createBlogValidationSchema = z.object({
   title: z.string(),
@@ -11,6 +11,10 @@ export const createBlogValidationSchema = z.object({
   coverImage: z.string().optional(),
 
   status: z.enum(Object.values(BlogStatus) as [string, ...string[]]).optional(),
+  type: z.enum(
+    Object.values(BlogTypes) as [string, ...string[]],
+    `Type must be ${Object.values(BlogTypes).join(',')}`
+  ),
   author: z.string(),
 });
 

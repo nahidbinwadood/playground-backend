@@ -1,7 +1,14 @@
 import { Model, Types } from 'mongoose';
+
 export enum BlogStatus {
   DRAFT = 'DRAFT',
   PUBLISHED = 'PUBLISHED',
+}
+
+export enum BlogTypes {
+  FRONTEND = 'FRONTEND',
+  BACKEND = 'BACKEND',
+  JAVASCRIPT = 'JAVASCRIPT',
 }
 
 export interface IBlog {
@@ -12,6 +19,7 @@ export interface IBlog {
   coverImage?: string;
   author: Types.ObjectId;
   status: BlogStatus;
+  type: BlogTypes;
   isDeleted: boolean;
   isPublished: boolean;
   createdAt?: Date;
