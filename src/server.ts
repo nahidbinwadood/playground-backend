@@ -1,6 +1,6 @@
 import { Server } from 'http';
-import mongoose from 'mongoose';
 import app, { envVars } from './app';
+import { connectDB } from './connectDB';
 
 let server: Server;
 
@@ -9,10 +9,13 @@ const DB_URL = envVars.DB_URL;
 
 const startServer = async () => {
   try {
-    // Connect to DB in background (non-blocking) to speed up restarts
-    console.info('🔄 Database connection initiated...');
-    await mongoose.connect(DB_URL);
-    console.info('✅ Database connection established successfully');
+    try {
+      await connectDB(DB_URL);
+    } catch (dbError) {
+      console.error('⚠️ WARNING: Database connection failed on startup');
+      console.error('The server will start, but database operations may fail');
+      console.error(dbError);
+    }
 
     server = app.listen(PORT, () => {
       console.info(`🚀 Server started successfully`);
