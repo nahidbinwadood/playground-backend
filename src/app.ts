@@ -12,25 +12,25 @@ const app: Application = express();
 
 export const envVars = loadEnvironmentVariables();
 
-const allowedOrigins = [
-  envVars.FRONTEND_URL_LOCAL,
-  envVars.FRONTEND_URL_PRODUCTION,
-].filter(Boolean) as string[];
+// const allowedOrigins = [
+//   envVars.FRONTEND_URL_LOCAL,
+//   envVars.FRONTEND_URL_PRODUCTION,
+// ].filter(Boolean) as string[];
 
-const corsOptions = {
-  origin: (origin: string | undefined, callback: any) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new AppError(401, 'Now Allowed Origin'));
-    }
-  },
-  credentials: true,
-};
+// const corsOptions = {
+//   origin: (origin: string | undefined, callback: any) => {
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       callback(new AppError(401, 'Now Allowed Origin'));
+//     }
+//   },
+//   credentials: true,
+// };
 
 // middlewares==>
 app.use(express.json());
-app.use(cors(corsOptions));
+app.use(cors());
 
 // router==>
 app.use('/api/v1', router);
