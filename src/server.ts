@@ -24,7 +24,9 @@ const startServer = async () => {
   }
 };
 
-startServer();
+(async () => {
+  await startServer();
+})();
 
 process.on('SIGTERM', () => {
   console.log('SIGTERM signal received...Server is shutting down');

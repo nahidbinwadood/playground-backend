@@ -18,7 +18,9 @@ export const connectDB = async (dbUrl: string): Promise<void> => {
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
-      console.info(`🔄 Database connection attempt ${attempt}/${MAX_RETRIES}...`);
+      console.info(
+        `🔄 Database connection attempt ${attempt}/${MAX_RETRIES}...`
+      );
 
       // Log connection URL (masked for security)
       const urlDomain = dbUrl.match(/@([^/]+)/)?.[1] || 'unknown';
@@ -70,8 +72,7 @@ export const disconnectDB = async (): Promise<void> => {
 
 export const getDBStatus = (): boolean => {
   // Check actual mongoose connection state
-  const mongooseConnected = mongoose.connection.readyState === 1;
-  return mongooseConnected;
+  return mongoose.connection.readyState === 1;
 };
 
 export const setDBStatus = (status: boolean): void => {
