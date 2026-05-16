@@ -27,6 +27,9 @@ const app: Application = express();
 //   credentials: true,
 // };
 
+const variables = loadEnvironmentVariables();
+console.log({ variables });
+
 // middlewares==>
 app.use(express.json());
 app.use(cors());
@@ -40,6 +43,7 @@ app.get('/', (req: Request, res: Response) => {
     success: true,
     statusCode: httpStatusCode.OK,
     message: 'The playground server is running',
+    data: variables,
   });
 });
 
