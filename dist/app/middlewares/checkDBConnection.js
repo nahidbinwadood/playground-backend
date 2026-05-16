@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const sendResponse_1 = __importDefault(require("../utils/sendResponse"));
 const connectDB_1 = require("../db/connectDB");
-const app_1 = require("../../app");
+const env_1 = require("../config/env");
 const checkDBConnection = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     // If already connected, proceed immediately
     if ((0, connectDB_1.getDBStatus)()) {
@@ -24,7 +24,7 @@ const checkDBConnection = (req, res, next) => __awaiter(void 0, void 0, void 0, 
     // Connection dropped (e.g. Atlas idle timeout) — try to reconnect once
     try {
         console.warn('⚠️ DB not connected on request. Attempting reconnect...');
-        yield (0, connectDB_1.connectDB)(app_1.envVars.DB_URL);
+        yield (0, connectDB_1.connectDB)(env_1.envVars.DB_URL);
         return next();
     }
     catch (_a) {

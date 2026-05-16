@@ -3,22 +3,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.envVars = void 0;
 const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
-const env_1 = require("./app/config/env");
 const checkDBConnection_1 = __importDefault(require("./app/middlewares/checkDBConnection"));
 const globalErrorHandler_1 = __importDefault(require("./app/middlewares/globalErrorHandler"));
 const notFound_1 = __importDefault(require("./app/middlewares/notFound"));
 const router_1 = __importDefault(require("./app/routes/router"));
 const sendResponse_1 = __importDefault(require("./app/utils/sendResponse"));
 const connectDB_1 = require("./app/db/connectDB");
+const env_1 = require("./app/config/env");
 const app = (0, express_1.default)();
-exports.envVars = (0, env_1.loadEnvironmentVariables)();
 const allowedOrigins = [
-    exports.envVars.FRONTEND_URL_LOCAL,
-    exports.envVars.FRONTEND_URL_PRODUCTION,
+    env_1.envVars.FRONTEND_URL_LOCAL,
+    env_1.envVars.FRONTEND_URL_PRODUCTION,
 ].filter(Boolean);
 const corsOptions = {
     origin: (origin, callback) => {

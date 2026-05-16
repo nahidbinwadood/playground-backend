@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loadEnvironmentVariables = void 0;
+exports.envVars = void 0;
 const dotenv_1 = require("dotenv");
 (0, dotenv_1.config)();
 const loadEnvironmentVariables = () => {
@@ -36,4 +36,4 @@ const loadEnvironmentVariables = () => {
         FRONTEND_URL_PRODUCTION: process.env.FRONTEND_URL_PRODUCTION,
     };
 };
-exports.loadEnvironmentVariables = loadEnvironmentVariables;
+exports.envVars = loadEnvironmentVariables();

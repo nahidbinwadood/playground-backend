@@ -12,13 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const env_1 = require("./app/config/env");
 const app_1 = __importDefault(require("./app"));
 const connectDB_1 = require("./app/db/connectDB");
+const env_1 = require("./app/config/env");
 let server;
-const envVars = (0, env_1.loadEnvironmentVariables)();
-const PORT = envVars.PORT;
-const DB_URL = envVars.DB_URL;
+const PORT = env_1.envVars.PORT;
+const DB_URL = env_1.envVars.DB_URL;
 const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield (0, connectDB_1.connectDB)(DB_URL);

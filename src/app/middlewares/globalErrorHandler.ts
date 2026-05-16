@@ -4,7 +4,7 @@ import httpStatusCode from 'http-status-codes';
 import { AppError } from '../errorHelpers/appError';
 import { ZodError } from 'zod';
 import jwt from 'jsonwebtoken';
-import { envVars } from '../../app';
+import { envVars } from '../config/env';
 
 interface IErrorResponse {
   success: false;

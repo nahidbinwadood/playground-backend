@@ -15,7 +15,7 @@ interface IEnvVariables {
   FRONTEND_URL_PRODUCTION: string;
 }
 
-export const loadEnvironmentVariables = (): IEnvVariables => {
+const loadEnvironmentVariables = (): IEnvVariables => {
   // FRONTEND_URL_LOCAL is optional — it's only available in local dev environments
   const requiredVariables: Array<keyof IEnvVariables> = [
     'PORT',
@@ -50,3 +50,5 @@ export const loadEnvironmentVariables = (): IEnvVariables => {
     FRONTEND_URL_PRODUCTION: process.env.FRONTEND_URL_PRODUCTION as string,
   };
 };
+
+export const envVars = loadEnvironmentVariables();

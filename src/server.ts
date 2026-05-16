@@ -1,12 +1,9 @@
-import { loadEnvironmentVariables } from './app/config/env';
 import { Server } from 'http';
-
 import app from './app';
 import { connectDB } from './app/db/connectDB';
+import { envVars } from './app/config/env';
 
 let server: Server;
-
-const envVars = loadEnvironmentVariables();
 
 const PORT = envVars.PORT;
 const DB_URL = envVars.DB_URL;

@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import httpStatusCode from 'http-status-codes';
 import sendResponse from '../utils/sendResponse';
 import { connectDB, getDBStatus } from '../db/connectDB';
-import { envVars } from '../../app';
+import { envVars } from '../config/env';
 
 const checkDBConnection = async (
   req: Request,

@@ -29,7 +29,7 @@ const user_model_1 = require("../user/user.model");
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jwt_1 = require("../../utils/jwt");
-const app_1 = require("../../../app");
+const env_1 = require("../../config/env");
 // create user==>
 const createUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const isExist = yield user_model_1.User.findOne({ email: payload.email });
@@ -38,7 +38,7 @@ const createUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
         throw new appError_1.AppError(http_status_codes_1.default.BAD_REQUEST, 'User already exist with this email');
     }
     // hash the password
-    payload.password = yield bcryptjs_1.default.hash(payload.password, Number(app_1.envVars.BCRYPT_SALT_ROUND));
+    payload.password = yield bcryptjs_1.default.hash(payload.password, Number(env_1.envVars.BCRYPT_SALT_ROUND));
     // create user==>
     const user = yield user_model_1.User.create(Object.assign({}, payload));
     const _a = user === null || user === void 0 ? void 0 : user.toObject(), { password } = _a, rest = __rest(_a, ["password"]);
@@ -102,7 +102,7 @@ const changePassword = (payload) => __awaiter(void 0, void 0, void 0, function* 
         throw new appError_1.AppError(http_status_codes_1.default.BAD_REQUEST, 'New Password cannot be same as the old password');
     }
     // hash the password==>
-    const updatedPassword = yield bcryptjs_1.default.hash(payload.newPassword, Number(app_1.envVars.BCRYPT_SALT_ROUND));
+    const updatedPassword = yield bcryptjs_1.default.hash(payload.newPassword, Number(env_1.envVars.BCRYPT_SALT_ROUND));
     // update the password==>
     const response = yield user_model_1.User.findOneAndUpdate({ email: payload.email }, { password: updatedPassword }, { returnDocument: 'after' });
     if (response) {
