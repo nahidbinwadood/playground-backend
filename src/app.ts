@@ -36,13 +36,13 @@ app.use(cors());
 app.use('/api/v1', router);
 
 // base route==>
-app.get('/', (req: Request, res: Response) => {
-  sendResponse(res, {
-    success: true,
-    statusCode: httpStatusCode.OK,
-    message: 'The playground server is running',
-  });
-});
+// app.get('/', (req: Request, res: Response) => {
+//   sendResponse(res, {
+//     success: true,
+//     statusCode: httpStatusCode.OK,
+//     message: 'The playground server is running',
+//   });
+// });
 
 // global error handler==>
 app.use(globalErrorHandler);

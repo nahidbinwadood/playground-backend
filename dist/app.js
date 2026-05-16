@@ -6,12 +6,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.envVars = void 0;
 const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
-const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const env_1 = require("./app/config/env");
 const globalErrorHandler_1 = __importDefault(require("./app/middlewares/globalErrorHandler"));
 const notFound_1 = __importDefault(require("./app/middlewares/notFound"));
 const router_1 = __importDefault(require("./app/routes/router"));
-const sendResponse_1 = __importDefault(require("./app/utils/sendResponse"));
 const app = (0, express_1.default)();
 exports.envVars = (0, env_1.loadEnvironmentVariables)();
 // const allowedOrigins = [
@@ -34,12 +32,12 @@ app.use((0, cors_1.default)());
 // router==>
 app.use('/api/v1', router_1.default);
 // base route==>
-// app.get('/', (req, res) => {
-//     (0, sendResponse_1.default)(res, {
-//         success: true,
-//         statusCode: http_status_codes_1.default.OK,
-//         message: 'The playground server is running',
-//     });
+// app.get('/', (req: Request, res: Response) => {
+//   sendResponse(res, {
+//     success: true,
+//     statusCode: httpStatusCode.OK,
+//     message: 'The playground server is running',
+//   });
 // });
 // global error handler==>
 app.use(globalErrorHandler_1.default);
