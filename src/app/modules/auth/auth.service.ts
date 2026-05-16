@@ -4,7 +4,7 @@ import { User } from '../user/user.model';
 import httpStatusCode from 'http-status-codes';
 import bcrypt from 'bcryptjs';
 import { generateToken } from '../../utils/jwt';
-import envVars from '../../../server';
+import { envVars } from '../../../app';
 
 // create user==>
 const createUser = async (payload: Partial<IUser>) => {

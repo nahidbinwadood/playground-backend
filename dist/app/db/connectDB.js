@@ -19,7 +19,7 @@ const MAX_RETRIES = 3;
 const RETRY_DELAY = 2000; // 2 seconds
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const connectDB = (dbUrl) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+    var _a, _b;
     // Check if already connected
     if (isDBConnected && mongoose_1.default.connection.readyState === 1) {
         console.info('✅ Already connected to database');
@@ -56,7 +56,8 @@ const connectDB = (dbUrl) => __awaiter(void 0, void 0, void 0, function* () {
     console.error('❌ Failed to connect to database after all retries');
     console.error(`Error: ${lastError === null || lastError === void 0 ? void 0 : lastError.message}`);
     console.error(`Error Code: ${lastError === null || lastError === void 0 ? void 0 : lastError.code}`);
-    // Don't throw - let server start anyway so we can serve /health endpoint
+    // Throw so the caller can log and handle appropriately
+    throw new Error(`Database connection failed: ${(_b = lastError === null || lastError === void 0 ? void 0 : lastError.message) !== null && _b !== void 0 ? _b : 'Unknown error'}`);
 });
 exports.connectDB = connectDB;
 const disconnectDB = () => __awaiter(void 0, void 0, void 0, function* () {
@@ -81,3 +82,16 @@ const setDBStatus = (status) => {
     isDBConnected = status;
 };
 exports.setDBStatus = setDBStatus;
+// Handle Atlas dropping idle connections (common on M0 free tier)
+mongoose_1.default.connection.on('disconnected', () => {
+    console.warn('⚠️ MongoDB disconnected. Will reconnect on next request.');
+    isDBConnected = false;
+});
+mongoose_1.default.connection.on('reconnected', () => {
+    console.info('✅ MongoDB reconnected successfully');
+    isDBConnected = true;
+});
+mongoose_1.default.connection.on('error', (err) => {
+    console.error('❌ MongoDB connection error:', err.message);
+    isDBConnected = false;
+});

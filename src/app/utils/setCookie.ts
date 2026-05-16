@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import envVars from '../../server';
+import { envVars } from '../../app';
 
 export interface IAuthTokens {
   accessToken: string;

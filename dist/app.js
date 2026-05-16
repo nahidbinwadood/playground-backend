@@ -16,23 +16,24 @@ const sendResponse_1 = __importDefault(require("./app/utils/sendResponse"));
 const connectDB_1 = require("./app/db/connectDB");
 const app = (0, express_1.default)();
 exports.envVars = (0, env_1.loadEnvironmentVariables)();
-// const allowedOrigins = [
-//   envVars.FRONTEND_URL_LOCAL,
-//   envVars.FRONTEND_URL_PRODUCTION,
-// ].filter(Boolean) as string[];
-// const corsOptions = {
-//   origin: (origin: string | undefined, callback: any) => {
-//     if (!origin || allowedOrigins.includes(origin)) {
-//       callback(null, true);
-//     } else {
-//       callback(new AppError(401, 'Now Allowed Origin'));
-//     }
-//   },
-//   credentials: true,
-// };
+const allowedOrigins = [
+    exports.envVars.FRONTEND_URL_LOCAL,
+    exports.envVars.FRONTEND_URL_PRODUCTION,
+].filter(Boolean);
+const corsOptions = {
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        }
+        else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+};
 // middlewares==>
 app.use(express_1.default.json());
-app.use((0, cors_1.default)());
+app.use((0, cors_1.default)(corsOptions));
 // router==>
 app.use('/api/v1', checkDBConnection_1.default, router_1.default);
 // base route==>
@@ -59,16 +60,6 @@ app.get('/health', (req, res) => {
             database: dbStatus ? 'connected' : 'disconnected',
             timestamp: new Date().toISOString(),
         },
-    });
-});
-// Debug endpoint - remove after testing
-app.get('/debug', (req, res) => {
-    const dbUrl = exports.envVars.DB_URL;
-    const masked = dbUrl.replace(/:([^@]+)@/, ':***@');
-    res.json({
-        dbUrlMasked: masked,
-        dbConnected: (0, connectDB_1.getDBStatus)(),
-        nodeEnv: process.env.NODE_ENV,
     });
 });
 // not found==>

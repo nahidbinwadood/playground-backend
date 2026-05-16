@@ -13,25 +13,25 @@ const app: Application = express();
 
 export const envVars = loadEnvironmentVariables();
 
-// const allowedOrigins = [
-//   envVars.FRONTEND_URL_LOCAL,
-//   envVars.FRONTEND_URL_PRODUCTION,
-// ].filter(Boolean) as string[];
+const allowedOrigins = [
+  envVars.FRONTEND_URL_LOCAL,
+  envVars.FRONTEND_URL_PRODUCTION,
+].filter(Boolean) as string[];
 
-// const corsOptions = {
-//   origin: (origin: string | undefined, callback: any) => {
-//     if (!origin || allowedOrigins.includes(origin)) {
-//       callback(null, true);
-//     } else {
-//       callback(new AppError(401, 'Now Allowed Origin'));
-//     }
-//   },
-//   credentials: true,
-// };
+const corsOptions = {
+  origin: (origin: string | undefined, callback: any) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+};
 
 // middlewares==>
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsOptions));
 
 // router==>
 app.use('/api/v1', checkDBConnection, router);
@@ -62,18 +62,6 @@ app.get('/health', (req: Request, res: Response) => {
       database: dbStatus ? 'connected' : 'disconnected',
       timestamp: new Date().toISOString(),
     },
-  });
-});
-
-// Debug endpoint - remove after testing
-app.get('/debug', (req: Request, res: Response) => {
-  const dbUrl = envVars.DB_URL;
-  const masked = dbUrl.replace(/:([^@]+)@/, ':***@');
-
-  res.json({
-    dbUrlMasked: masked,
-    dbConnected: getDBStatus(),
-    nodeEnv: process.env.NODE_ENV,
   });
 });
 

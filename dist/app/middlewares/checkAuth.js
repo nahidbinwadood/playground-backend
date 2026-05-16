@@ -17,7 +17,7 @@ const appError_1 = require("../errorHelpers/appError");
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const user_model_1 = require("../modules/user/user.model");
 const user_interface_1 = require("../modules/user/user.interface");
-const server_1 = __importDefault(require("../../server"));
+const app_1 = require("../../app");
 const checkAuth = (...authRoles) => {
     return (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
@@ -27,7 +27,7 @@ const checkAuth = (...authRoles) => {
             if (!token) {
                 throw new appError_1.AppError(http_status_codes_1.default.UNAUTHORIZED, 'No authorization token found');
             }
-            const decodedToken = (0, jwt_1.verifyToken)(token, server_1.default.JWT_ACCESS_SECRET);
+            const decodedToken = (0, jwt_1.verifyToken)(token, app_1.envVars.JWT_ACCESS_SECRET);
             const isUserExist = yield user_model_1.User.findOne({ _id: decodedToken === null || decodedToken === void 0 ? void 0 : decodedToken.userId });
             //throw error if the user doest not exist==>
             if (!isUserExist) {
