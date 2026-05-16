@@ -11,7 +11,7 @@ const validateRequest_1 = __importDefault(require("../../middlewares/validateReq
 const blog_validation_1 = require("./blog.validation");
 const router = (0, express_1.Router)();
 // get all blogs==>
-router.get('/', (0, checkAuth_1.default)('admin'), blog_controller_1.BlogControllers.getAllBlogs);
+router.get('/', blog_controller_1.BlogControllers.getAllBlogs);
 // create blog==>
 router.post('/create', (0, checkAuth_1.default)('admin'), (0, validateRequest_1.default)(blog_validation_1.createBlogValidationSchema), blog_controller_1.BlogControllers.createBlog);
 // update blog==>

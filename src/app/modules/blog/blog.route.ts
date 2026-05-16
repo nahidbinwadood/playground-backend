@@ -10,7 +10,7 @@ import {
 const router = Router();
 
 // get all blogs==>
-router.get('/', checkAuth('admin'), BlogControllers.getAllBlogs);
+router.get('/', BlogControllers.getAllBlogs);
 
 // create blog==>
 router.post(
