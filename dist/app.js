@@ -18,7 +18,7 @@ exports.envVars = (0, env_1.loadEnvironmentVariables)();
 const allowedOrigins = [
     exports.envVars.FRONTEND_URL_LOCAL,
     exports.envVars.FRONTEND_URL_PRODUCTION,
-];
+].filter(Boolean);
 const corsOptions = {
     origin: (origin, callback) => {
         if (!origin || allowedOrigins.includes(origin)) {
