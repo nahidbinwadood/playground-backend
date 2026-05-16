@@ -34,13 +34,13 @@ app.use((0, cors_1.default)());
 // router==>
 app.use('/api/v1', router_1.default);
 // base route==>
-app.get('/', (req, res) => {
-    (0, sendResponse_1.default)(res, {
-        success: true,
-        statusCode: http_status_codes_1.default.OK,
-        message: 'The playground server is running',
-    });
-});
+// app.get('/', (req, res) => {
+//     (0, sendResponse_1.default)(res, {
+//         success: true,
+//         statusCode: http_status_codes_1.default.OK,
+//         message: 'The playground server is running',
+//     });
+// });
 // global error handler==>
 app.use(globalErrorHandler_1.default);
 // not found==>
