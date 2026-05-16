@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.setDBStatus = exports.getDBStatus = exports.disconnectDB = exports.connectDB = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
+const appError_1 = require("../errorHelpers/appError");
 let isDBConnected = false;
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 2000; // 2 seconds
@@ -57,7 +58,7 @@ const connectDB = (dbUrl) => __awaiter(void 0, void 0, void 0, function* () {
     console.error(`Error: ${lastError === null || lastError === void 0 ? void 0 : lastError.message}`);
     console.error(`Error Code: ${lastError === null || lastError === void 0 ? void 0 : lastError.code}`);
     // Throw so the caller can log and handle appropriately
-    throw new Error(`Database connection failed: ${(_b = lastError === null || lastError === void 0 ? void 0 : lastError.message) !== null && _b !== void 0 ? _b : 'Unknown error'}`);
+    throw new appError_1.AppError(500, `Database connection failed: ${(_b = lastError === null || lastError === void 0 ? void 0 : lastError.message) !== null && _b !== void 0 ? _b : 'Unknown error'}`);
 });
 exports.connectDB = connectDB;
 const disconnectDB = () => __awaiter(void 0, void 0, void 0, function* () {

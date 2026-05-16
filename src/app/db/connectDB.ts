@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { AppError } from '../errorHelpers/appError';
 
 let isDBConnected = false;
 
@@ -56,7 +57,10 @@ export const connectDB = async (dbUrl: string): Promise<void> => {
   console.error(`Error Code: ${lastError?.code}`);
 
   // Throw so the caller can log and handle appropriately
-  throw new Error(`Database connection failed: ${lastError?.message ?? 'Unknown error'}`);
+  throw new AppError(
+    500,
+    `Database connection failed: ${lastError?.message ?? 'Unknown error'}`
+  );
 };
 
 export const disconnectDB = async (): Promise<void> => {

@@ -23,8 +23,6 @@ const loadEnvironmentVariables = () => {
             throw new Error(`Environment Variable Missing: ${key}`);
         }
     });
-    // Diagnostic log — confirms DB_URL is loaded at startup
-    console.info(`🔗 DB_URL loaded: ${process.env.DB_URL ? 'YES ✅' : 'NO ❌ — DB_URL is missing!'}`);
     return {
         PORT: process.env.PORT,
         DB_URL: process.env.DB_URL,
