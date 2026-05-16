@@ -64,6 +64,18 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
+// Debug endpoint - remove after testing
+app.get('/debug', (req: Request, res: Response) => {
+  const dbUrl = envVars.DB_URL;
+  const masked = dbUrl.replace(/:([^@]+)@/, ':***@');
+
+  res.json({
+    dbUrlMasked: masked,
+    dbConnected: getDBStatus(),
+    nodeEnv: process.env.NODE_ENV,
+  });
+});
+
 // global error handler==>
 app.use(globalErrorHandler);
 

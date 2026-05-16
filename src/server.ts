@@ -9,13 +9,8 @@ const DB_URL = envVars.DB_URL;
 
 const startServer = async () => {
   try {
-    try {
-      await connectDB(DB_URL);
-    } catch (dbError) {
-      console.error('⚠️ WARNING: Database connection failed on startup');
-      console.error('The server will start, but database operations may fail');
-      console.error(dbError);
-    }
+    // Attempt to connect to database (won't block server startup)
+    await connectDB(DB_URL);
 
     server = app.listen(PORT, () => {
       console.info(`🚀 Server started successfully`);
