@@ -12,18 +12,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const mongoose_1 = __importDefault(require("mongoose"));
 const app_1 = __importDefault(require("./app"));
 const env_1 = require("./app/config/env");
+const connectDB_1 = require("./app/db/connectDB");
 let server;
 const envVars = (0, env_1.loadEnvironmentVariables)();
 const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const PORT = envVars.PORT;
         const DB_URL = envVars.DB_URL;
-        console.info('🔄 Initializing server...');
-        yield mongoose_1.default.connect(DB_URL);
-        console.info('✅ Database connection established successfully');
+        yield (0, connectDB_1.connectDB)(DB_URL);
         server = app_1.default.listen(PORT, () => {
             console.info(`🚀 Server started successfully`);
             console.info(`📡 Listening on port: ${PORT}`);

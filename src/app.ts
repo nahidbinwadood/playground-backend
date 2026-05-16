@@ -7,10 +7,11 @@ import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import notFound from './app/middlewares/notFound';
 import router from './app/routes/router';
 import sendResponse from './app/utils/sendResponse';
-import { connectDB, getDBStatus } from './app/db/connectDB';
-import envVars from './server';
+import { getDBStatus } from './app/db/connectDB';
 
 const app: Application = express();
+
+export const envVars = loadEnvironmentVariables();
 
 // const allowedOrigins = [
 //   envVars.FRONTEND_URL_LOCAL,
@@ -36,13 +37,11 @@ app.use(cors());
 app.use('/api/v1', checkDBConnection, router);
 
 // base route==>
-app.get('/', async (req: Request, res: Response) => {
-  const connectDb = await connectDB(envVars.DB_URL);
+app.get('/', (req: Request, res: Response) => {
   sendResponse(res, {
     success: true,
     statusCode: httpStatusCode.OK,
     message: 'The playground server is running',
-    data: connectDb,
   });
 });
 
@@ -63,6 +62,18 @@ app.get('/health', (req: Request, res: Response) => {
       database: dbStatus ? 'connected' : 'disconnected',
       timestamp: new Date().toISOString(),
     },
+  });
+});
+
+// Debug endpoint - remove after testing
+app.get('/debug', (req: Request, res: Response) => {
+  const dbUrl = envVars.DB_URL;
+  const masked = dbUrl.replace(/:([^@]+)@/, ':***@');
+
+  res.json({
+    dbUrlMasked: masked,
+    dbConnected: getDBStatus(),
+    nodeEnv: process.env.NODE_ENV,
   });
 });
 

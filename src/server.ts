@@ -2,6 +2,7 @@ import { Server } from 'http';
 import mongoose from 'mongoose';
 import app from './app';
 import { loadEnvironmentVariables } from './app/config/env';
+import { connectDB } from './app/db/connectDB';
 
 let server: Server;
 
@@ -12,9 +13,8 @@ const startServer = async () => {
     const PORT = envVars.PORT;
     const DB_URL = envVars.DB_URL;
 
-    console.info('🔄 Initializing server...');
-    await mongoose.connect(DB_URL);
-    console.info('✅ Database connection established successfully');
+    await connectDB(DB_URL);
+
     server = app.listen(PORT, () => {
       console.info(`🚀 Server started successfully`);
       console.info(`📡 Listening on port: ${PORT}`);

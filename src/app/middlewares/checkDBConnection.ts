@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import httpStatusCode from 'http-status-codes';
-import { getDBStatus } from '../db/connectDB';
 import sendResponse from '../utils/sendResponse';
+import { getDBStatus } from '../db/connectDB';
 
 const checkDBConnection = (
   req: Request,
