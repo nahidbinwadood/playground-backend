@@ -1,17 +1,20 @@
 import { Server } from 'http';
-import app, { envVars } from './app';
-import { connectDB } from './connectDB';
+import mongoose from 'mongoose';
+import { loadEnvironmentVariables } from './app/config/env';
+import app from './app';
 
 let server: Server;
 
-const PORT = envVars.PORT;
-const DB_URL = envVars.DB_URL;
+const envVars = loadEnvironmentVariables();
 
 const startServer = async () => {
   try {
-    // Attempt to connect to database (won't block server startup)
-    await connectDB(DB_URL);
+    const PORT = envVars.PORT;
+    const DB_URL = envVars.DB_URL;
 
+    console.info('🔄 Initializing server...');
+    await mongoose.connect(DB_URL);
+    console.info('✅ Database connection established successfully');
     server = app.listen(PORT, () => {
       console.info(`🚀 Server started successfully`);
       console.info(`📡 Listening on port: ${PORT}`);
@@ -35,11 +38,13 @@ process.on('SIGTERM', () => {
       process.exit(1);
     });
   }
+
   process.exit(1);
 });
 
 process.on('SIGINT', () => {
   console.log('SIGINT signal received...Server is shutting down');
+
   if (server) {
     server.close(() => {
       process.exit(1);
@@ -49,25 +54,13 @@ process.on('SIGINT', () => {
 });
 
 // unhandled error==>
-process.on('unhandledRejection', (error) => {
-  console.log('Unhandled error occured', error);
-
-  if (server) {
-    server.close(() => {
-      process.exit(1);
-    });
-  }
-  process.exit(1);
+process.on('unhandledRejection', (err) => {
+  startServer();
 });
 
-// uncaught execption ==>
-process.on('uncaughtException', (error) => {
-  console.log('Uncaught exception occured', error);
-
-  if (server) {
-    server.close(() => {
-      process.exit(1);
-    });
-  }
-  process.exit(1);
+// uncaught exception==>
+process.on('uncaughtException', (err) => {
+  startServer();
 });
+
+export default envVars;

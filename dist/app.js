@@ -3,15 +3,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.envVars = void 0;
 const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
-const env_1 = require("./app/config/env");
+const http_status_codes_1 = __importDefault(require("http-status-codes"));
+const checkDBConnection_1 = __importDefault(require("./app/middlewares/checkDBConnection"));
 const globalErrorHandler_1 = __importDefault(require("./app/middlewares/globalErrorHandler"));
 const notFound_1 = __importDefault(require("./app/middlewares/notFound"));
 const router_1 = __importDefault(require("./app/routes/router"));
+const sendResponse_1 = __importDefault(require("./app/utils/sendResponse"));
+const connectDB_1 = require("./connectDB");
 const app = (0, express_1.default)();
-exports.envVars = (0, env_1.loadEnvironmentVariables)();
 // const allowedOrigins = [
 //   envVars.FRONTEND_URL_LOCAL,
 //   envVars.FRONTEND_URL_PRODUCTION,
@@ -30,17 +31,35 @@ exports.envVars = (0, env_1.loadEnvironmentVariables)();
 app.use(express_1.default.json());
 app.use((0, cors_1.default)());
 // router==>
-app.use('/api/v1', router_1.default);
+app.use('/api/v1', checkDBConnection_1.default, router_1.default);
 // base route==>
-app.get('/', (req: Request, res: Response) => {
-  sendResponse(res, {
-    success: true,
-    statusCode: httpStatusCode.OK,
-    message: 'The playground server is running',
-  });
+app.get('/', (req, res) => {
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: http_status_codes_1.default.OK,
+        message: 'The playground server is running',
+    });
 });
-// global error handler==>
-app.use(globalErrorHandler_1.default);
+// health check endpoint
+app.get('/health', (req, res) => {
+    const dbStatus = (0, connectDB_1.getDBStatus)();
+    (0, sendResponse_1.default)(res, {
+        success: dbStatus,
+        statusCode: dbStatus
+            ? http_status_codes_1.default.OK
+            : http_status_codes_1.default.SERVICE_UNAVAILABLE,
+        message: dbStatus
+            ? 'Server is healthy and database is connected'
+            : 'Server is running but database connection failed',
+        data: {
+            server: 'running',
+            database: dbStatus ? 'connected' : 'disconnected',
+            timestamp: new Date().toISOString(),
+        },
+    });
+});
 // not found==>
 app.use(notFound_1.default);
+// global error handler==>
+app.use(globalErrorHandler_1.default);
 exports.default = app;

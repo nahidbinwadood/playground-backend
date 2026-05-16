@@ -2,17 +2,14 @@ import cors from 'cors';
 import express, { Application, Request, Response } from 'express';
 import httpStatusCode from 'http-status-codes';
 import { loadEnvironmentVariables } from './app/config/env';
-import { AppError } from './app/errorHelpers/appError';
-import { getDBStatus } from './connectDB';
 import checkDBConnection from './app/middlewares/checkDBConnection';
 import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import notFound from './app/middlewares/notFound';
 import router from './app/routes/router';
 import sendResponse from './app/utils/sendResponse';
+import { getDBStatus } from './connectDB';
 
 const app: Application = express();
-
-export const envVars = loadEnvironmentVariables();
 
 // const allowedOrigins = [
 //   envVars.FRONTEND_URL_LOCAL,
@@ -52,7 +49,9 @@ app.get('/health', (req: Request, res: Response) => {
 
   sendResponse(res, {
     success: dbStatus,
-    statusCode: dbStatus ? httpStatusCode.OK : httpStatusCode.SERVICE_UNAVAILABLE,
+    statusCode: dbStatus
+      ? httpStatusCode.OK
+      : httpStatusCode.SERVICE_UNAVAILABLE,
     message: dbStatus
       ? 'Server is healthy and database is connected'
       : 'Server is running but database connection failed',
@@ -64,22 +63,10 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
-// Debug endpoint - remove after testing
-app.get('/debug', (req: Request, res: Response) => {
-  const dbUrl = envVars.DB_URL;
-  const masked = dbUrl.replace(/:([^@]+)@/, ':***@');
-
-  res.json({
-    dbUrlMasked: masked,
-    dbConnected: getDBStatus(),
-    nodeEnv: process.env.NODE_ENV,
-  });
-});
+// not found==>
+app.use(notFound);
 
 // global error handler==>
 app.use(globalErrorHandler);
-
-// not found==>
-app.use(notFound);
 
 export default app;

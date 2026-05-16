@@ -8,7 +8,7 @@ const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const appError_1 = require("../errorHelpers/appError");
 const zod_1 = require("zod");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const app_1 = require("../../app");
+const server_1 = __importDefault(require("../../server"));
 const globalErrorHandler = (err, req, res, next) => {
     var _a;
     let statusCode = http_status_codes_1.default.INTERNAL_SERVER_ERROR;
@@ -92,7 +92,7 @@ const globalErrorHandler = (err, req, res, next) => {
         statusCode,
         message,
         errors,
-        stack: app_1.envVars.NODE_ENV == 'development' ? err === null || err === void 0 ? void 0 : err.stack : null,
+        stack: server_1.default.NODE_ENV == 'development' ? err === null || err === void 0 ? void 0 : err.stack : null,
     };
     if (errors && Object.keys(errors).length > 0) {
         errorResponse.errors = errors;

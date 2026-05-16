@@ -5,7 +5,7 @@ import httpStatusCode from 'http-status-codes';
 import { User } from '../modules/user/user.model';
 import { JwtPayload } from 'jsonwebtoken';
 import { IsActive } from '../modules/user/user.interface';
-import { envVars } from '../../app';
+import envVars from '../../server';
 
 const checkAuth = (...authRoles: string[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
