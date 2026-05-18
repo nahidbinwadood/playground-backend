@@ -4,12 +4,39 @@ import { BlogServices } from './blog.service';
 import sendResponse from '../../utils/sendResponse';
 import httpStatusCode from 'http-status-codes';
 import { AppError } from '../../errorHelpers/appError';
-import { isValidObjectId } from 'mongoose';
+import { isValidObjectId, mongo } from 'mongoose';
 
 // get all blogs==>
 const getAllBlogs = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const response = await BlogServices.getAllBlogs();
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatusCode.OK,
+      message: 'All Blogs Data Fetched Successfully',
+      data: response,
+    });
+  }
+);
+
+// get single blog==>
+const getSingleBlog = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+
+    if (!id) {
+      throw new AppError(httpStatusCode.NOT_FOUND, 'Blog id is required');
+    }
+
+    if (!isValidObjectId(id)) {
+      throw new AppError(
+        httpStatusCode.NOT_FOUND,
+        'Blog id must be a valid id'
+      );
+    }
+
+    const response = await BlogServices.getSingleBlog(id);
 
     sendResponse(res, {
       success: true,
@@ -92,4 +119,5 @@ export const BlogControllers = {
   createBlog,
   updateBlog,
   deleteBlog,
+  getSingleBlog,
 };

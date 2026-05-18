@@ -12,6 +12,9 @@ const router = Router();
 // get all blogs==>
 router.get('/', BlogControllers.getAllBlogs);
 
+// get single blog==>
+router.get('/:id', BlogControllers.getSingleBlog);
+
 // create blog==>
 router.post(
   '/create',

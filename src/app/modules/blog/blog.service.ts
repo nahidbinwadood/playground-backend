@@ -11,6 +11,13 @@ const getAllBlogs = async () => {
   return getAllBlogs;
 };
 
+// get all blogs==>
+const getSingleBlog = async (id: string) => {
+  const response = await Blog.findById(id);
+
+  return response;
+};
+
 // create blogs==>
 const createBlog = async (payload: Partial<IBlog>) => {
   const response = await Blog.create(payload);
@@ -56,4 +63,5 @@ export const BlogServices = {
   createBlog,
   updateBlog,
   deleteBlog,
+  getSingleBlog,
 };

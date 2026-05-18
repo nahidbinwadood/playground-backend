@@ -29,6 +29,23 @@ const getAllBlogs = (0, catchAsync_1.default)((req, res, next) => __awaiter(void
         data: response,
     });
 }));
+// get single blog==>
+const getSingleBlog = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    if (!id) {
+        throw new appError_1.AppError(http_status_codes_1.default.NOT_FOUND, 'Blog id is required');
+    }
+    if (!(0, mongoose_1.isValidObjectId)(id)) {
+        throw new appError_1.AppError(http_status_codes_1.default.NOT_FOUND, 'Blog id must be a valid id');
+    }
+    const response = yield blog_service_1.BlogServices.getSingleBlog(id);
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: http_status_codes_1.default.OK,
+        message: 'All Blogs Data Fetched Successfully',
+        data: response,
+    });
+}));
 // create blog==>
 const createBlog = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const response = yield blog_service_1.BlogServices.createBlog(req.body);
@@ -83,4 +100,5 @@ exports.BlogControllers = {
     createBlog,
     updateBlog,
     deleteBlog,
+    getSingleBlog,
 };

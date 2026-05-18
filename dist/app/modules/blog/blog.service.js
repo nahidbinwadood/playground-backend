@@ -22,6 +22,11 @@ const getAllBlogs = () => __awaiter(void 0, void 0, void 0, function* () {
     const getAllBlogs = yield blog_model_1.Blog.find({});
     return getAllBlogs;
 });
+// get all blogs==>
+const getSingleBlog = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield blog_model_1.Blog.findById(id);
+    return response;
+});
 // create blogs==>
 const createBlog = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const response = yield blog_model_1.Blog.create(payload);
@@ -56,4 +61,5 @@ exports.BlogServices = {
     createBlog,
     updateBlog,
     deleteBlog,
+    getSingleBlog,
 };

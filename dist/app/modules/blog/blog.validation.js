@@ -9,6 +9,7 @@ exports.createBlogValidationSchema = zod_1.z.object({
     content: zod_1.z.string(),
     coverImage: zod_1.z.string().optional(),
     status: zod_1.z.enum(Object.values(blog_interface_1.BlogStatus)).optional(),
+    type: zod_1.z.enum(Object.values(blog_interface_1.BlogTypes), `Type must be ${Object.values(blog_interface_1.BlogTypes).join(',')}`),
     author: zod_1.z.string(),
 });
 exports.updateBlogValidationSchema = zod_1.z.object({
