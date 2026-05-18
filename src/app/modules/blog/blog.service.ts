@@ -13,7 +13,7 @@ const getAllBlogs = async () => {
 
 // get all blogs==>
 const getSingleBlog = async (id: string) => {
-  const response = await Blog.findById(id);
+  const response = await Blog.findOne({ _id: id });
 
   return response;
 };

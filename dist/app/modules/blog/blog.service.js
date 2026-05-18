@@ -24,7 +24,7 @@ const getAllBlogs = () => __awaiter(void 0, void 0, void 0, function* () {
 });
 // get all blogs==>
 const getSingleBlog = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield blog_model_1.Blog.findById(id);
+    const response = yield blog_model_1.Blog.findOne({ _id: id });
     return response;
 });
 // create blogs==>
