@@ -14,8 +14,11 @@ const getAllBlogs = async () => {
 // get all blogs==>
 const getSingleBlog = async (slug: string) => {
   const response = await Blog.findOne({ slug: slug });
+  if (response) {
+    return response;
+  }
 
-  return response;
+  throw new AppError(httpStatusCode.NOT_FOUND, 'Invalid Slug Provided');
 };
 
 // create blogs==>
