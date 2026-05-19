@@ -41,7 +41,7 @@ const getSingleBlog = (0, catchAsync_1.default)((req, res, next) => __awaiter(vo
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.default.OK,
-        message: 'All Blogs Data Fetched Successfully',
+        message: 'Blog Data Fetched Successfully',
         data: response,
     });
 }));

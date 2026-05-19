@@ -36,7 +36,7 @@ const getSingleBlog = catchAsync(
     sendResponse(res, {
       success: true,
       statusCode: httpStatusCode.OK,
-      message: 'All Blogs Data Fetched Successfully',
+      message: 'Blog Data Fetched Successfully',
       data: response,
     });
   }

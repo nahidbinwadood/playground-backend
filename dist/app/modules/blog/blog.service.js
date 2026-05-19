@@ -25,7 +25,10 @@ const getAllBlogs = () => __awaiter(void 0, void 0, void 0, function* () {
 // get all blogs==>
 const getSingleBlog = (slug) => __awaiter(void 0, void 0, void 0, function* () {
     const response = yield blog_model_1.Blog.findOne({ slug: slug });
-    return response;
+    if (response) {
+        return response;
+    }
+    throw new appError_1.AppError(http_status_codes_1.default.NOT_FOUND, 'Invalid Slug Provided');
 });
 // create blogs==>
 const createBlog = (payload) => __awaiter(void 0, void 0, void 0, function* () {
