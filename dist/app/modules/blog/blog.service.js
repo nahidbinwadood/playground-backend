@@ -23,8 +23,8 @@ const getAllBlogs = () => __awaiter(void 0, void 0, void 0, function* () {
     return getAllBlogs;
 });
 // get all blogs==>
-const getSingleBlog = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield blog_model_1.Blog.findOne({ _id: id });
+const getSingleBlog = (slug) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield blog_model_1.Blog.findOne({ slug: slug });
     return response;
 });
 // create blogs==>

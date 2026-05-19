@@ -23,20 +23,15 @@ const getAllBlogs = catchAsync(
 // get single blog==>
 const getSingleBlog = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const slug = Array.isArray(req.params.slug)
+      ? req.params.slug[0]
+      : req.params.slug;
 
-    if (!id) {
-      throw new AppError(httpStatusCode.NOT_FOUND, 'Blog id is required');
+    if (!slug) {
+      throw new AppError(httpStatusCode.NOT_FOUND, 'Slug is required');
     }
 
-    if (!isValidObjectId(id)) {
-      throw new AppError(
-        httpStatusCode.NOT_FOUND,
-        'Blog id must be a valid id'
-      );
-    }
-
-    const response = await BlogServices.getSingleBlog(id);
+    const response = await BlogServices.getSingleBlog(slug);
 
     sendResponse(res, {
       success: true,

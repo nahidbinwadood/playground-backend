@@ -12,8 +12,8 @@ const getAllBlogs = async () => {
 };
 
 // get all blogs==>
-const getSingleBlog = async (id: string) => {
-  const response = await Blog.findOne({ _id: id });
+const getSingleBlog = async (slug: string) => {
+  const response = await Blog.findOne({ slug: slug });
 
   return response;
 };
