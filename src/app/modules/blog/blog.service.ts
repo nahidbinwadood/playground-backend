@@ -24,6 +24,10 @@ const getSingleBlog = async (slug: string) => {
 
 // create blogs==>
 const createBlog = async (payload: Partial<IBlog>) => {
+  // if the status is draft then is publish will be false otherwise true==>
+  if (payload.status) {
+    payload.isPublished = Boolean(payload.status === 'PUBLISHED');
+  }
   const response = await Blog.create(payload);
 
   return response;
@@ -53,6 +57,11 @@ const updateBlog = async (_id: string, payload: Partial<IBlog>) => {
           'Another blog exists with the same title'
         );
       }
+    }
+
+    // if the status is draft then is publish will be false otherwise true==>
+    if (payload.status) {
+      payload.isPublished = Boolean(payload.status === 'PUBLISHED');
     }
 
     // single-doc update is atomic in mongo — no transaction needed
