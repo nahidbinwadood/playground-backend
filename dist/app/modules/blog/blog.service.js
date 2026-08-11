@@ -33,49 +33,90 @@ const getSingleBlog = (slug) => __awaiter(void 0, void 0, void 0, function* () {
 });
 // create blogs==>
 const createBlog = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    // if the status is draft then is publish will be false otherwise true==>
+    if (payload.status) {
+        payload.isPublished = Boolean(payload.status === 'PUBLISHED');
+    }
     const response = yield blog_model_1.Blog.create(payload);
     return response;
 });
 // update blog==>
 const updateBlog = (_id, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    // throw error if the blog does not exist==>
-    const isExist = yield blog_model_1.Blog.findById(_id);
-    if (!isExist) {
-        throw new appError_1.AppError(http_status_codes_1.default.BAD_REQUEST, 'Blog does not exist');
-    }
-    // modify the slug==>
-    if (payload.title) {
-        payload.slug = (0, generateSlug_1.generateSlug)(payload.title);
-        // throw error if the slug already exists==>
-        const isExistSameSlug = yield blog_model_1.Blog.findOne({ slug: payload.slug });
-        if (isExistSameSlug) {
-            throw new appError_1.AppError(http_status_codes_1.default.BAD_REQUEST, 'Another blog exists with the same title');
+    const session = yield blog_model_1.Blog.startSession();
+    session.startTransaction();
+    try {
+        // throw error if the blog does not exist==>
+        const isExist = yield blog_model_1.Blog.findById(_id);
+        if (!isExist) {
+            throw new appError_1.AppError(http_status_codes_1.default.BAD_REQUEST, 'Blog does not exist');
         }
-    }
-    // single-doc update is atomic in mongo — no transaction needed
-    const response = yield blog_model_1.Blog.findOneAndUpdate({ _id }, Object.assign({}, payload), {
-        returnDocument: 'after',
-        runValidators: true,
-    });
-    // delete the previous image AFTER the db update — best-effort,
-    // a cleanup failure must not fail an update that already succeeded
-    if (payload.coverImage && payload.deleteImageUrl) {
-        try {
-            yield (0, cloudinary_config_1.deleteImageFromCloudinary)(payload.deleteImageUrl);
+        // modify the slug==>
+        if (payload.title) {
+            payload.slug = (0, generateSlug_1.generateSlug)(payload.title);
+            // throw error if the slug already exists==>
+            const isExistSameSlug = yield blog_model_1.Blog.findOne({ slug: payload.slug });
+            if (isExistSameSlug && (isExistSameSlug === null || isExistSameSlug === void 0 ? void 0 : isExistSameSlug.id) !== isExist.id) {
+                throw new appError_1.AppError(http_status_codes_1.default.BAD_REQUEST, 'Another blog exists with the same title');
+            }
         }
-        catch (error) {
-            console.log('Failed to delete old cover image:', error);
+        // if the status is draft then is publish will be false otherwise true==>
+        if (payload.status) {
+            payload.isPublished = Boolean(payload.status === 'PUBLISHED');
         }
+        // single-doc update is atomic in mongo — no transaction needed
+        const response = yield blog_model_1.Blog.findOneAndUpdate({ _id }, Object.assign({}, payload), {
+            returnDocument: 'after',
+            runValidators: true,
+            session,
+        });
+        // delete the previous image AFTER the db update — best-effort,
+        if (payload.coverImage && payload.deleteImageUrl) {
+            console.log(isExist.coverImage, payload.deleteImageUrl);
+            // throw error if the delete image url is invalid==>
+            if (payload.deleteImageUrl !== isExist.coverImage) {
+                throw new appError_1.AppError(http_status_codes_1.default.BAD_REQUEST, 'Invalid Delete Image URL Provided');
+            }
+            try {
+                yield (0, cloudinary_config_1.deleteImageFromCloudinary)(payload.deleteImageUrl);
+            }
+            catch (error) {
+                console.log('Failed to delete old cover image:', error);
+            }
+        }
+        yield session.commitTransaction();
+        session.endSession();
+        return response;
     }
-    return response;
+    catch (error) {
+        yield session.abortTransaction();
+        session.endSession();
+        throw new appError_1.AppError(http_status_codes_1.default.BAD_REQUEST, (error === null || error === void 0 ? void 0 : error.message) || 'Failed to update the blog');
+    }
 });
 // delete blog==>
 const deleteBlog = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield blog_model_1.Blog.findByIdAndDelete(id);
-    if (!response) {
-        throw new appError_1.AppError(http_status_codes_1.default.NOT_FOUND, 'Blog not found');
+    const session = yield blog_model_1.Blog.startSession();
+    session.startTransaction();
+    try {
+        const isExist = yield blog_model_1.Blog.findById(id);
+        // throw error if the blog does not exist==>
+        if (!isExist) {
+            throw new appError_1.AppError(http_status_codes_1.default.NOT_FOUND, 'Blog not found');
+        }
+        const response = yield blog_model_1.Blog.findByIdAndDelete(id);
+        // delete the cover image from cloudinary after delete==>
+        if (isExist === null || isExist === void 0 ? void 0 : isExist.coverImage) {
+            yield (0, cloudinary_config_1.deleteImageFromCloudinary)(isExist.coverImage);
+        }
+        yield session.commitTransaction();
+        session.endSession();
+        return response;
     }
-    return response;
+    catch (error) {
+        yield session.abortTransaction();
+        session.endSession();
+        throw new appError_1.AppError(http_status_codes_1.default.BAD_REQUEST, (error === null || error === void 0 ? void 0 : error.message) || 'Failed to delete the blog');
+    }
 });
 exports.BlogServices = {
     getAllBlogs,
