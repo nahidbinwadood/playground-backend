@@ -33,8 +33,13 @@ const globalErrorHandler = async (
   //   stack: err.stack,
   // });
 
-  if (req.file) {
-    await deleteImageFromCloudinary(req.file.path);
+  // path only set once upload succeeded; a delete failure must not mask the original error
+  if (req.file?.path) {
+    try {
+      await deleteImageFromCloudinary(req.file.path);
+    } catch (cleanupError) {
+      console.log('Failed to clean up uploaded image:', cleanupError);
+    }
   }
 
   // ========= CUSTOM APP ERROR=============

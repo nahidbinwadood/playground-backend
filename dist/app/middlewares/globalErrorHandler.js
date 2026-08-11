@@ -21,7 +21,7 @@ const multer_1 = __importDefault(require("multer"));
 const env_1 = require("../config/env");
 const cloudinary_config_1 = require("../config/cloudinary.config");
 const globalErrorHandler = (err, req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+    var _a, _b;
     let statusCode = http_status_codes_1.default.INTERNAL_SERVER_ERROR;
     let message = 'Something Went Wrong';
     let errors;
@@ -31,8 +31,14 @@ const globalErrorHandler = (err, req, res, next) => __awaiter(void 0, void 0, vo
     //   type: err.constructor.name,
     //   stack: err.stack,
     // });
-    if (req.file) {
-        yield (0, cloudinary_config_1.deleteImageFromCloudinary)(req.file.path);
+    // path only set once upload succeeded; a delete failure must not mask the original error
+    if ((_a = req.file) === null || _a === void 0 ? void 0 : _a.path) {
+        try {
+            yield (0, cloudinary_config_1.deleteImageFromCloudinary)(req.file.path);
+        }
+        catch (cleanupError) {
+            console.log('Failed to clean up uploaded image:', cleanupError);
+        }
     }
     // ========= CUSTOM APP ERROR=============
     if (err instanceof appError_1.AppError) {
@@ -45,7 +51,7 @@ const globalErrorHandler = (err, req, res, next) => __awaiter(void 0, void 0, vo
         statusCode = http_status_codes_1.default.BAD_REQUEST;
         message = 'Zod Validation Error';
         // format zod errors in a readable object
-        errors = (_a = err === null || err === void 0 ? void 0 : err.issues) === null || _a === void 0 ? void 0 : _a.reduce((acc, error) => {
+        errors = (_b = err === null || err === void 0 ? void 0 : err.issues) === null || _b === void 0 ? void 0 : _b.reduce((acc, error) => {
             const path = error === null || error === void 0 ? void 0 : error.path.join('.');
             acc[path] = error === null || error === void 0 ? void 0 : error.message;
             return acc;

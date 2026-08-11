@@ -52,26 +52,22 @@ const updateBlog = (_id, payload) => __awaiter(void 0, void 0, void 0, function*
             throw new appError_1.AppError(http_status_codes_1.default.BAD_REQUEST, 'Another blog exists with the same title');
         }
     }
-    const session = yield blog_model_1.Blog.startSession();
-    session.startTransaction();
-    try {
-        const response = yield blog_model_1.Blog.findOneAndUpdate({ _id }, Object.assign({}, payload), {
-            returnDocument: 'after',
-            runValidators: true,
-        });
-        // delete the previous image==>
-        if (payload.coverImage && payload.deleteImageUrl) {
+    // single-doc update is atomic in mongo — no transaction needed
+    const response = yield blog_model_1.Blog.findOneAndUpdate({ _id }, Object.assign({}, payload), {
+        returnDocument: 'after',
+        runValidators: true,
+    });
+    // delete the previous image AFTER the db update — best-effort,
+    // a cleanup failure must not fail an update that already succeeded
+    if (payload.coverImage && payload.deleteImageUrl) {
+        try {
             yield (0, cloudinary_config_1.deleteImageFromCloudinary)(payload.deleteImageUrl);
         }
-        yield session.commitTransaction();
-        session.endSession();
-        return response;
+        catch (error) {
+            console.log('Failed to delete old cover image:', error);
+        }
     }
-    catch (error) {
-        yield session.abortTransaction();
-        session.endSession();
-        throw new appError_1.AppError(http_status_codes_1.default.BAD_REQUEST, 'Failed to update the blog');
-    }
+    return response;
 });
 // delete blog==>
 const deleteBlog = (id) => __awaiter(void 0, void 0, void 0, function* () {

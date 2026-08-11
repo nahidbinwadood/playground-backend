@@ -12,8 +12,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteImageFromCloudinary = void 0;
+exports.deleteImageFromCloudinary = exports.uploadImageToCloudinary = void 0;
 const cloudinary_1 = require("cloudinary");
+const crypto_1 = require("crypto");
 const env_1 = require("./env");
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const appError_1 = require("../errorHelpers/appError");
@@ -23,6 +24,17 @@ cloudinary_1.v2.config({
     api_key: env_1.envVars.CLOUDINARY_API_KEY,
     api_secret: env_1.envVars.CLOUDINARY_API_SECRET,
 });
+const uploadImageToCloudinary = (buffer) => new Promise((resolve, reject) => {
+    cloudinary_1.v2.uploader
+        .upload_stream({ folder: 'playground', public_id: (0, crypto_1.randomBytes)(16).toString('hex') }, (error, result) => {
+        if (error || !result) {
+            return reject(error !== null && error !== void 0 ? error : new Error('Cloudinary upload failed'));
+        }
+        resolve(result.secure_url);
+    })
+        .end(buffer);
+});
+exports.uploadImageToCloudinary = uploadImageToCloudinary;
 const deleteImageFromCloudinary = (imageUrl) => __awaiter(void 0, void 0, void 0, function* () {
     const public_id = getPublicId(imageUrl);
     if (!public_id) {
@@ -30,7 +42,8 @@ const deleteImageFromCloudinary = (imageUrl) => __awaiter(void 0, void 0, void 0
     }
     try {
         const result = yield cloudinary_1.v2.uploader.destroy(public_id);
-        if (result.result !== 'ok') {
+        // 'not found' = already deleted = goal achieved (idempotent delete)
+        if (result.result !== 'ok' && result.result !== 'not found') {
             throw new Error(`Cloudinary destroy failed: ${result.result}`);
         }
         console.log(`Deleted Image ${public_id}`);
