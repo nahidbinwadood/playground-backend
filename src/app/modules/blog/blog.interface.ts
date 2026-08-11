@@ -24,6 +24,7 @@ export interface IBlog {
   isPublished: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  deleteImageUrl?: string;
 }
 
 export interface BlogModel extends Model<IBlog> {}

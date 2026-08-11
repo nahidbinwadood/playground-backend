@@ -12,11 +12,26 @@ exports.createBlogValidationSchema = zod_1.z.object({
     type: zod_1.z.enum(Object.values(blog_interface_1.BlogTypes), `Type must be ${Object.values(blog_interface_1.BlogTypes).join(',')}`),
     author: zod_1.z.string(),
 });
-exports.updateBlogValidationSchema = zod_1.z.object({
+exports.updateBlogValidationSchema = zod_1.z
+    .object({
     title: zod_1.z.string().optional(),
     excerpt: zod_1.z.string().optional(),
     content: zod_1.z.string().optional(),
     coverImage: zod_1.z.string().optional(),
-    status: zod_1.z.enum(Object.values(blog_interface_1.BlogStatus)).optional(),
+    status: zod_1.z
+        .enum(Object.values(blog_interface_1.BlogStatus))
+        .optional(),
     isPublished: zod_1.z.boolean().optional(),
+    deleteImageUrl: zod_1.z.string().optional(),
+})
+    .superRefine((data, ctx) => {
+    if (data.coverImage) {
+        if (!data.deleteImageUrl) {
+            ctx.addIssue({
+                code: 'custom',
+                path: ['deleteImageUrl'],
+                message: 'Delete Image Url is required',
+            });
+        }
+    }
 });

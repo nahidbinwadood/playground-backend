@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BlogServices = void 0;
+const cloudinary_config_1 = require("../../config/cloudinary.config");
 const appError_1 = require("../../errorHelpers/appError");
 const generateSlug_1 = require("../../utils/generateSlug");
 const blog_model_1 = require("./blog.model");
@@ -37,19 +38,40 @@ const createBlog = (payload) => __awaiter(void 0, void 0, void 0, function* () {
 });
 // update blog==>
 const updateBlog = (_id, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    // throw error if the blog does not exist==>
+    const isExist = yield blog_model_1.Blog.findById(_id);
+    if (!isExist) {
+        throw new appError_1.AppError(http_status_codes_1.default.BAD_REQUEST, 'Blog does not exist');
+    }
     // modify the slug==>
     if (payload.title) {
         payload.slug = (0, generateSlug_1.generateSlug)(payload.title);
+        // throw error if the slug already exists==>
+        const isExistSameSlug = yield blog_model_1.Blog.findOne({ slug: payload.slug });
+        if (isExistSameSlug) {
+            throw new appError_1.AppError(http_status_codes_1.default.BAD_REQUEST, 'Another blog exists with the same title');
+        }
     }
-    const response = yield blog_model_1.Blog.findOneAndUpdate({ _id }, Object.assign({}, payload), {
-        returnDocument: 'after',
-        runValidators: true,
-    });
-    // throw error if the response not found==>
-    if (!response) {
-        throw new appError_1.AppError(http_status_codes_1.default.NOT_FOUND, 'Blog not found');
+    const session = yield blog_model_1.Blog.startSession();
+    session.startTransaction();
+    try {
+        const response = yield blog_model_1.Blog.findOneAndUpdate({ _id }, Object.assign({}, payload), {
+            returnDocument: 'after',
+            runValidators: true,
+        });
+        // delete the previous image==>
+        if (payload.coverImage && payload.deleteImageUrl) {
+            yield (0, cloudinary_config_1.deleteImageFromCloudinary)(payload.deleteImageUrl);
+        }
+        yield session.commitTransaction();
+        session.endSession();
+        return response;
     }
-    return response;
+    catch (error) {
+        yield session.abortTransaction();
+        session.endSession();
+        throw new appError_1.AppError(http_status_codes_1.default.BAD_REQUEST, 'Failed to update the blog');
+    }
 });
 // delete blog==>
 const deleteBlog = (id) => __awaiter(void 0, void 0, void 0, function* () {

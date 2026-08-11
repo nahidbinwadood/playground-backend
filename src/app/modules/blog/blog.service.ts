@@ -1,3 +1,4 @@
+import { deleteImageFromCloudinary } from '../../config/cloudinary.config';
 import { AppError } from '../../errorHelpers/appError';
 import { generateSlug } from '../../utils/generateSlug';
 import { IBlog } from './blog.interface';
@@ -30,25 +31,52 @@ const createBlog = async (payload: Partial<IBlog>) => {
 
 // update blog==>
 const updateBlog = async (_id: string, payload: Partial<IBlog>) => {
+  // throw error if the blog does not exist==>
+  const isExist = await Blog.findById(_id);
+  if (!isExist) {
+    throw new AppError(httpStatusCode.BAD_REQUEST, 'Blog does not exist');
+  }
+
   // modify the slug==>
   if (payload.title) {
     payload.slug = generateSlug(payload.title);
-  }
-  const response = await Blog.findOneAndUpdate(
-    { _id },
-    { ...payload },
-    {
-      returnDocument: 'after',
-      runValidators: true,
+
+    // throw error if the slug already exists==>
+    const isExistSameSlug = await Blog.findOne({ slug: payload.slug });
+    if (isExistSameSlug) {
+      throw new AppError(
+        httpStatusCode.BAD_REQUEST,
+        'Another blog exists with the same title'
+      );
     }
-  );
-
-  // throw error if the response not found==>
-  if (!response) {
-    throw new AppError(httpStatusCode.NOT_FOUND, 'Blog not found');
   }
 
-  return response;
+  const session = await Blog.startSession();
+  session.startTransaction();
+  try {
+    const response = await Blog.findOneAndUpdate(
+      { _id },
+      { ...payload },
+      {
+        returnDocument: 'after',
+        runValidators: true,
+      }
+    );
+
+    // delete the previous image==>
+    if (payload.coverImage && payload.deleteImageUrl) {
+      await deleteImageFromCloudinary(payload.deleteImageUrl);
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+    return response;
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+
+    throw new AppError(httpStatusCode.BAD_REQUEST, 'Failed to update the blog');
+  }
 };
 
 // delete blog==>

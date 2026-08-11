@@ -12,25 +12,31 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const multer_1 = __importDefault(require("multer"));
+const multer_storage_cloudinary_1 = require("multer-storage-cloudinary");
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
+const cloudinary_config_1 = __importDefault(require("../config/cloudinary.config"));
+const crypto_1 = require("crypto");
 const appError_1 = require("../errorHelpers/appError");
-const validateRequest = (zodSchema, fileName) => {
-    return (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-        try {
-            if (req.file && fileName) {
-                req.body = Object.assign(Object.assign({}, req.body), { [fileName]: req.file.path });
-            }
-            // check the empty body==>
-            if (!req.body || Object.keys(req.body).length === 0) {
-                throw new appError_1.AppError(http_status_codes_1.default.BAD_REQUEST, 'Request body is empty');
-            }
-            // parse the schema==>
-            req.body = yield zodSchema.parseAsync(req.body);
-            next();
+const storage = new multer_storage_cloudinary_1.CloudinaryStorage({
+    cloudinary: cloudinary_config_1.default,
+    params: (req, file) => __awaiter(void 0, void 0, void 0, function* () {
+        return {
+            folder: 'playground',
+            public_id: (0, crypto_1.randomBytes)(16).toString('hex'),
+        };
+    }),
+});
+const multerUpload = (0, multer_1.default)({
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
         }
-        catch (error) {
-            next(error);
+        else {
+            cb(new appError_1.AppError(http_status_codes_1.default.BAD_REQUEST, 'Only image files are allowed'));
         }
-    });
-};
-exports.default = validateRequest;
+    },
+});
+exports.default = multerUpload;

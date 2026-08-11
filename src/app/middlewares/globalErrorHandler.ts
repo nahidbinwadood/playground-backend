@@ -4,7 +4,9 @@ import httpStatusCode from 'http-status-codes';
 import { AppError } from '../errorHelpers/appError';
 import { ZodError } from 'zod';
 import jwt from 'jsonwebtoken';
+import multer from 'multer';
 import { envVars } from '../config/env';
+import { deleteImageFromCloudinary } from '../config/cloudinary.config';
 
 interface IErrorResponse {
   success: false;
@@ -14,7 +16,7 @@ interface IErrorResponse {
   stack?: string | null;
 }
 
-const globalErrorHandler = (
+const globalErrorHandler = async (
   err: any,
   req: Request,
   res: Response,
@@ -31,6 +33,10 @@ const globalErrorHandler = (
   //   stack: err.stack,
   // });
 
+  if (req.file) {
+    await deleteImageFromCloudinary(req.file.path);
+  }
+
   // ========= CUSTOM APP ERROR=============
   if (err instanceof AppError) {
     statusCode = err.statusCode;
@@ -41,7 +47,7 @@ const globalErrorHandler = (
   // ========= ZOD VALIDATION ERROR=============
   else if (err instanceof ZodError) {
     statusCode = httpStatusCode.BAD_REQUEST;
-    message = 'Validation Error';
+    message = 'Zod Validation Error';
 
     // format zod errors in a readable object
     errors = err?.issues?.reduce(
@@ -69,6 +75,28 @@ const globalErrorHandler = (
     message = 'Invalid token. Please login again.';
     errors = err;
     console.log('✓ Handled as Invalid Token Error');
+  }
+
+  // ========= MULTER UPLOAD ERROR=============
+  else if (err instanceof multer.MulterError) {
+    statusCode = httpStatusCode.BAD_REQUEST;
+    const multerMessages: Record<string, string> = {
+      LIMIT_FILE_SIZE: 'File is too large. Max size is 5MB',
+      LIMIT_UNEXPECTED_FILE: 'Unexpected file field. Use "file" as field name',
+      LIMIT_FILE_COUNT: 'Too many files uploaded',
+    };
+    message = multerMessages[err.code] || err.message;
+    console.log('✓ Handled as Multer Error');
+  }
+
+  // ========= CLOUDINARY UPLOAD ERROR=============
+  else if (err?.http_code) {
+    statusCode =
+      err.http_code >= 400 && err.http_code < 500
+        ? httpStatusCode.BAD_REQUEST
+        : httpStatusCode.INTERNAL_SERVER_ERROR;
+    message = `Image upload failed: ${err.message}`;
+    console.log('✓ Handled as Cloudinary Error');
   }
 
   // ========= MONGODB ERRORS=============

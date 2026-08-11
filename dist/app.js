@@ -30,6 +30,7 @@ const corsOptions = {
     credentials: true,
 };
 // middlewares==>
+app.use(express_1.default.urlencoded({ extended: true, }));
 app.use(express_1.default.json());
 app.use((0, cors_1.default)(corsOptions));
 // router==>

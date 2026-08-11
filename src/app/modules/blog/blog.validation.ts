@@ -18,15 +18,30 @@ export const createBlogValidationSchema = z.object({
   author: z.string(),
 });
 
-export const updateBlogValidationSchema = z.object({
-  title: z.string().optional(),
+export const updateBlogValidationSchema = z
+  .object({
+    title: z.string().optional(),
 
-  excerpt: z.string().optional(),
+    excerpt: z.string().optional(),
 
-  content: z.string().optional(),
+    content: z.string().optional(),
 
-  coverImage: z.string().optional(),
+    coverImage: z.string().optional(),
 
-  status: z.enum(Object.values(BlogStatus) as [string, ...string[]]).optional(),
-  isPublished: z.boolean().optional(),
-});
+    status: z
+      .enum(Object.values(BlogStatus) as [string, ...string[]])
+      .optional(),
+    isPublished: z.boolean().optional(),
+    deleteImageUrl: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.coverImage) {
+      if (!data.deleteImageUrl) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['deleteImageUrl'],
+          message: 'Delete Image Url is required',
+        });
+      }
+    }
+  });

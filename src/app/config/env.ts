@@ -13,6 +13,9 @@ interface IEnvVariables {
   JWT_REFRESH_EXPIRES: string;
   FRONTEND_URL_LOCAL: string | undefined; // optional — only used in local dev
   FRONTEND_URL_PRODUCTION: string;
+  CLOUDINARY_CLOUD_NAME: string;
+  CLOUDINARY_API_KEY: string;
+  CLOUDINARY_API_SECRET: string;
 }
 
 const loadEnvironmentVariables = (): IEnvVariables => {
@@ -28,6 +31,9 @@ const loadEnvironmentVariables = (): IEnvVariables => {
     'JWT_REFRESH_EXPIRES',
     'FRONTEND_URL_LOCAL',
     'FRONTEND_URL_PRODUCTION',
+    'CLOUDINARY_CLOUD_NAME',
+    'CLOUDINARY_API_KEY',
+    'CLOUDINARY_API_SECRET',
   ];
 
   requiredVariables.forEach((key) => {
@@ -48,6 +54,9 @@ const loadEnvironmentVariables = (): IEnvVariables => {
     JWT_REFRESH_EXPIRES: process.env.JWT_REFRESH_EXPIRES as string,
     FRONTEND_URL_LOCAL: process.env.FRONTEND_URL_LOCAL,
     FRONTEND_URL_PRODUCTION: process.env.FRONTEND_URL_PRODUCTION as string,
+    CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME as string,
+    CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY as string,
+    CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET as string,
   };
 };
 

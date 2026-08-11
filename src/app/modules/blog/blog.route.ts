@@ -6,6 +6,7 @@ import {
   createBlogValidationSchema,
   updateBlogValidationSchema,
 } from './blog.validation';
+import multerUpload from '../../middlewares/multer-upload';
 
 const router = Router();
 
@@ -19,7 +20,8 @@ router.get('/:slug', BlogControllers.getSingleBlog);
 router.post(
   '/create',
   checkAuth('admin'),
-  validateRequest(createBlogValidationSchema),
+  multerUpload.single('coverImage'),
+  validateRequest(createBlogValidationSchema, 'coverImage'),
   BlogControllers.createBlog
 );
 
@@ -27,7 +29,8 @@ router.post(
 router.patch(
   '/:id',
   checkAuth('admin'),
-  validateRequest(updateBlogValidationSchema),
+  multerUpload.single('coverImage'),
+  validateRequest(updateBlogValidationSchema, 'coverImage'),
   BlogControllers.updateBlog
 );
 
