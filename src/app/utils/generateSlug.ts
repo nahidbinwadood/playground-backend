@@ -1,6 +1,11 @@
-export const generateSlug = (title: string) => {
+export const generateSlug = (title: string): string => {
   return title
-    .split(' ')
-    .map((item) => item.toLocaleLowerCase())
-    .join('-');
+    .normalize('NFD')                    // decompose accented chars (é → e + ́)
+    .replace(/[\u0300-\u036f]/g, '')     // strip accent/diacritic marks
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')       // remove anything that's not alphanumeric, space, or hyphen
+    .replace(/[\s]+/g, '-')             // replace whitespace (including multiple spaces) with a single hyphen
+    .replace(/-+/g, '-')                // collapse consecutive hyphens into one
+    .replace(/^-+|-+$/g, '');           // strip leading/trailing hyphens
 };
