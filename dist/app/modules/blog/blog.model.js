@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Blog = void 0;
 const mongoose_1 = require("mongoose");
 const generateSlug_1 = require("../../utils/generateSlug");
+const blog_interface_1 = require("./blog.interface");
 const schemaTransform = {
     virtuals: true,
     transform: (_, ret) => {
@@ -31,6 +32,25 @@ const blogSchema = new mongoose_1.Schema({
         type: mongoose_1.Schema.Types.ObjectId,
         ref: 'User',
         required: true,
+    },
+    // these were previously undeclared, so Mongoose silently dropped them on
+    // every write — the topic map cannot work until they exist on the schema ==>
+    status: {
+        type: String,
+        enum: Object.values(blog_interface_1.BlogStatus),
+        default: blog_interface_1.BlogStatus.DRAFT,
+    },
+    type: {
+        type: String,
+        enum: Object.values(blog_interface_1.BlogTypes),
+        required: true,
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false,
+    },
+    deleteImageUrl: {
+        type: String,
     },
     isPublished: {
         type: Boolean,

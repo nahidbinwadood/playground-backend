@@ -18,6 +18,7 @@ const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const auth_service_1 = require("./auth.service");
 const setCookie_1 = require("../../utils/setCookie");
+const appError_1 = require("../../errorHelpers/appError");
 // create user==>
 const createUser = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const response = yield auth_service_1.AuthServices.createUser(req.body);
@@ -88,6 +89,25 @@ const logOut = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, v
         message: 'User Logged Out Successfully',
     });
 }));
+// refresh token ==>
+// The refresh token lives in an httpOnly cookie, so the client cannot read it
+// to send it back — the browser must attach the cookie itself.
+const refreshToken = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const token = (_a = req.cookies) === null || _a === void 0 ? void 0 : _a.refreshToken;
+    if (!token) {
+        throw new appError_1.AppError(http_status_codes_1.default.UNAUTHORIZED, 'No refresh token found in cookies');
+    }
+    const tokens = yield auth_service_1.AuthServices.refreshToken(token);
+    // rotate both cookies so the next refresh works with the new refresh token
+    (0, setCookie_1.setAuthCookie)(res, tokens);
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: http_status_codes_1.default.OK,
+        message: 'Access token refreshed successfully',
+        data: tokens,
+    });
+}));
 exports.AuthControllers = {
     createUser,
     loginUser,
@@ -95,4 +115,5 @@ exports.AuthControllers = {
     changePassword,
     logOut,
     updateProfile,
+    refreshToken,
 };

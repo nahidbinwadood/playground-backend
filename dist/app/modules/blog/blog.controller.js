@@ -19,13 +19,23 @@ const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const appError_1 = require("../../errorHelpers/appError");
 const mongoose_1 = require("mongoose");
-// get all blogs==>
+// get all blogs — public: published only ==>
 const getAllBlogs = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield blog_service_1.BlogServices.getAllBlogs();
+    const response = yield blog_service_1.BlogServices.getAllBlogs({ includeDrafts: false });
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.default.OK,
         message: 'All Blogs Data Fetched Successfully',
+        data: response,
+    });
+}));
+// get all blogs including drafts — admin table and the note form's picker ==>
+const getAllBlogsAdmin = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield blog_service_1.BlogServices.getAllBlogs({ includeDrafts: true });
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: http_status_codes_1.default.OK,
+        message: 'All Blogs With Drafts Fetched Successfully',
         data: response,
     });
 }));
@@ -96,6 +106,7 @@ const deleteBlog = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 
 }));
 exports.BlogControllers = {
     getAllBlogs,
+    getAllBlogsAdmin,
     createBlog,
     updateBlog,
     deleteBlog,

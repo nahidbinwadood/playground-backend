@@ -23,4 +23,8 @@ router.get('/me', (0, checkAuth_1.default)(), auth_controller_1.AuthControllers.
 router.patch('/me', (0, checkAuth_1.default)(), (0, validateRequest_1.default)(userSchema_1.updateUserSchema), auth_controller_1.AuthControllers.updateProfile);
 // change password==>
 router.post('/change-password', (0, validateRequest_1.default)(userSchema_1.changePasswordSchema), (0, checkAuth_1.default)(), auth_controller_1.AuthControllers.changePassword);
+// refresh token==>
+// unauthenticated by design: a dead access token is exactly when this is hit,
+// and the refresh token itself is the credential being verified
+router.post('/refresh-token', auth_controller_1.AuthControllers.refreshToken);
 exports.authRoutes = router;

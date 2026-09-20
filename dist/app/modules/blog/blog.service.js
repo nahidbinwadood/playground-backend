@@ -18,10 +18,16 @@ const appError_1 = require("../../errorHelpers/appError");
 const generateSlug_1 = require("../../utils/generateSlug");
 const blog_model_1 = require("./blog.model");
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
-// get all blogs==>
-const getAllBlogs = () => __awaiter(void 0, void 0, void 0, function* () {
-    const getAllBlogs = yield blog_model_1.Blog.find({});
-    return getAllBlogs;
+// get all blogs ==>
+// Drafts used to leak onto public pages because there was no isPublished filter.
+// The admin variant (drafts included) is exposed separately at GET /blogs/all.
+const getAllBlogs = (_a) => __awaiter(void 0, [_a], void 0, function* ({ includeDrafts = false, }) {
+    const filter = { isDeleted: { $ne: true } };
+    if (!includeDrafts) {
+        filter.isPublished = true;
+    }
+    const response = yield blog_model_1.Blog.find(filter).sort({ createdAt: -1 });
+    return response;
 });
 // get all blogs==>
 const getSingleBlog = (slug) => __awaiter(void 0, void 0, void 0, function* () {

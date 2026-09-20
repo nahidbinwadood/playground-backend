@@ -11,8 +11,11 @@ const validateRequest_1 = __importDefault(require("../../middlewares/validateReq
 const blog_validation_1 = require("./blog.validation");
 const multer_upload_1 = __importDefault(require("../../middlewares/multer-upload"));
 const router = (0, express_1.Router)();
-// get all blogs==>
+// get all blogs — public: published only ==>
 router.get('/', blog_controller_1.BlogControllers.getAllBlogs);
+// get all blogs including drafts — admin only; declared BEFORE /:slug so
+// Express doesn't match the literal "all" as a slug ==>
+router.get('/all', (0, checkAuth_1.default)('admin'), blog_controller_1.BlogControllers.getAllBlogsAdmin);
 // get single blog==>
 router.get('/:slug', blog_controller_1.BlogControllers.getSingleBlog);
 // create blog==>

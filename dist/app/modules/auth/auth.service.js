@@ -110,10 +110,17 @@ const changePassword = (payload) => __awaiter(void 0, void 0, void 0, function* 
         return updatedResponse;
     }
 });
+// refresh tokens ==>
+// createNewAccessToken used to be dead code — nothing called it, so sessions
+// died silently when the access token expired. This is its only consumer.
+const refreshToken = (refreshToken) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield (0, jwt_1.createNewAccessToken)(refreshToken);
+});
 exports.AuthServices = {
     createUser,
     loginUser,
     getProfile,
     changePassword,
     updateProfile,
+    refreshToken,
 };
