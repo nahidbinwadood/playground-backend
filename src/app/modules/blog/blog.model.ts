@@ -1,6 +1,6 @@
 import { HydratedDocument, model, Schema } from 'mongoose';
 import { generateSlug } from '../../utils/generateSlug';
-import { IBlog } from './blog.interface';
+import { BlogStatus, BlogTypes, IBlog } from './blog.interface';
 
 const schemaTransform = {
   virtuals: true,
@@ -38,6 +38,26 @@ const blogSchema = new Schema<IBlog>(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
+    },
+
+    // these were previously undeclared, so Mongoose silently dropped them on
+    // every write — the topic map cannot work until they exist on the schema ==>
+    status: {
+      type: String,
+      enum: Object.values(BlogStatus),
+      default: BlogStatus.DRAFT,
+    },
+    type: {
+      type: String,
+      enum: Object.values(BlogTypes),
+      required: true,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    deleteImageUrl: {
+      type: String,
     },
 
     isPublished: {

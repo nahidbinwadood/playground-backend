@@ -1,4 +1,5 @@
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import express, { Application, Request, Response } from 'express';
 import httpStatusCode from 'http-status-codes';
 import checkDBConnection from './app/middlewares/checkDBConnection';
@@ -30,6 +31,7 @@ const corsOptions = {
 // middlewares==>
 app.use(express.urlencoded({ extended: true, }));
 app.use(express.json());
+app.use(cookieParser()); // required to read the httpOnly refreshToken cookie in /auth/refresh-token
 app.use(cors(corsOptions));
 
 // router==>

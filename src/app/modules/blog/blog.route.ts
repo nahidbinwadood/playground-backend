@@ -10,8 +10,12 @@ import multerUpload from '../../middlewares/multer-upload';
 
 const router = Router();
 
-// get all blogs==>
+// get all blogs — public: published only ==>
 router.get('/', BlogControllers.getAllBlogs);
+
+// get all blogs including drafts — admin only; declared BEFORE /:slug so
+// Express doesn't match the literal "all" as a slug ==>
+router.get('/all', checkAuth('admin'), BlogControllers.getAllBlogsAdmin);
 
 // get single blog==>
 router.get('/:slug', BlogControllers.getSingleBlog);

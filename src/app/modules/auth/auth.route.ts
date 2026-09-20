@@ -49,4 +49,9 @@ router.post(
   AuthControllers.changePassword
 );
 
+// refresh token==>
+// unauthenticated by design: a dead access token is exactly when this is hit,
+// and the refresh token itself is the credential being verified
+router.post('/refresh-token', AuthControllers.refreshToken);
+
 export const authRoutes = router;

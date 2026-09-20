@@ -6,15 +6,29 @@ import httpStatusCode from 'http-status-codes';
 import { AppError } from '../../errorHelpers/appError';
 import { isValidObjectId, mongo } from 'mongoose';
 
-// get all blogs==>
+// get all blogs — public: published only ==>
 const getAllBlogs = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const response = await BlogServices.getAllBlogs();
+    const response = await BlogServices.getAllBlogs({ includeDrafts: false });
 
     sendResponse(res, {
       success: true,
       statusCode: httpStatusCode.OK,
       message: 'All Blogs Data Fetched Successfully',
+      data: response,
+    });
+  }
+);
+
+// get all blogs including drafts — admin table and the note form's picker ==>
+const getAllBlogsAdmin = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const response = await BlogServices.getAllBlogs({ includeDrafts: true });
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatusCode.OK,
+      message: 'All Blogs With Drafts Fetched Successfully',
       data: response,
     });
   }
@@ -111,6 +125,7 @@ const deleteBlog = catchAsync(
 
 export const BlogControllers = {
   getAllBlogs,
+  getAllBlogsAdmin,
   createBlog,
   updateBlog,
   deleteBlog,

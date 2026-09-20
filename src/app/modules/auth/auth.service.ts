@@ -3,7 +3,7 @@ import { IUser } from '../user/user.interface';
 import { User } from '../user/user.model';
 import httpStatusCode from 'http-status-codes';
 import bcrypt from 'bcryptjs';
-import { generateToken } from '../../utils/jwt';
+import { createNewAccessToken, generateToken } from '../../utils/jwt';
 import { envVars } from '../../config/env';
 
 // create user==>
@@ -155,10 +155,18 @@ const changePassword = async (payload: {
   }
 };
 
+// refresh tokens ==>
+// createNewAccessToken used to be dead code — nothing called it, so sessions
+// died silently when the access token expired. This is its only consumer.
+const refreshToken = async (refreshToken: string) => {
+  return await createNewAccessToken(refreshToken);
+};
+
 export const AuthServices = {
   createUser,
   loginUser,
   getProfile,
   changePassword,
   updateProfile,
+  refreshToken,
 };

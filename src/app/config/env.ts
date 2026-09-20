@@ -16,10 +16,16 @@ interface IEnvVariables {
   CLOUDINARY_CLOUD_NAME: string;
   CLOUDINARY_API_KEY: string;
   CLOUDINARY_API_SECRET: string;
+  TELEGRAM_BOT_TOKEN: string;
+  TELEGRAM_CHAT_ID: string;
+  REMINDER_SECRET: string;
+  REMINDER_TZ: string;
 }
 
 const loadEnvironmentVariables = (): IEnvVariables => {
   // FRONTEND_URL_LOCAL is optional — it's only available in local dev environments
+  // FRONTEND_URL_LOCAL is deliberately NOT required — it only exists in local
+  // dev, and a prod boot must not fail over its absence
   const requiredVariables: Array<keyof IEnvVariables> = [
     'PORT',
     'DB_URL',
@@ -29,11 +35,16 @@ const loadEnvironmentVariables = (): IEnvVariables => {
     'JWT_ACCESS_EXPIRES',
     'JWT_REFRESH_SECRET',
     'JWT_REFRESH_EXPIRES',
-    'FRONTEND_URL_LOCAL',
     'FRONTEND_URL_PRODUCTION',
     'CLOUDINARY_CLOUD_NAME',
     'CLOUDINARY_API_KEY',
     'CLOUDINARY_API_SECRET',
+    // reminder module — a missing value would mean the reminder silently
+    // never runs, which is the failure mode this validation exists to catch
+    'TELEGRAM_BOT_TOKEN',
+    'TELEGRAM_CHAT_ID',
+    'REMINDER_SECRET',
+    'REMINDER_TZ',
   ];
 
   requiredVariables.forEach((key) => {
@@ -57,6 +68,10 @@ const loadEnvironmentVariables = (): IEnvVariables => {
     CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME as string,
     CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY as string,
     CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET as string,
+    TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN as string,
+    TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID as string,
+    REMINDER_SECRET: process.env.REMINDER_SECRET as string,
+    REMINDER_TZ: process.env.REMINDER_TZ as string,
   };
 };
 

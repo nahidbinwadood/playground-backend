@@ -5,11 +5,23 @@ import { IBlog } from './blog.interface';
 import { Blog } from './blog.model';
 import httpStatusCode from 'http-status-codes';
 
-// get all blogs==>
-const getAllBlogs = async () => {
-  const getAllBlogs = await Blog.find({});
+// get all blogs ==>
+// Drafts used to leak onto public pages because there was no isPublished filter.
+// The admin variant (drafts included) is exposed separately at GET /blogs/all.
+const getAllBlogs = async ({
+  includeDrafts = false,
+}: {
+  includeDrafts?: boolean;
+}) => {
+  const filter: Record<string, unknown> = { isDeleted: { $ne: true } };
 
-  return getAllBlogs;
+  if (!includeDrafts) {
+    filter.isPublished = true;
+  }
+
+  const response = await Blog.find(filter).sort({ createdAt: -1 });
+
+  return response;
 };
 
 // get all blogs==>

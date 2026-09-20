@@ -4,6 +4,7 @@ import sendResponse from '../../utils/sendResponse';
 import httpStatusCode from 'http-status-codes';
 import { AuthServices } from './auth.service';
 import { removeAuthCookie, setAuthCookie } from '../../utils/setCookie';
+import { AppError } from '../../errorHelpers/appError';
 
 // create user==>
 const createUser = catchAsync(
@@ -99,6 +100,34 @@ const logOut = catchAsync(
   }
 );
 
+// refresh token ==>
+// The refresh token lives in an httpOnly cookie, so the client cannot read it
+// to send it back — the browser must attach the cookie itself.
+const refreshToken = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const token = req.cookies?.refreshToken as string | undefined;
+
+    if (!token) {
+      throw new AppError(
+        httpStatusCode.UNAUTHORIZED,
+        'No refresh token found in cookies'
+      );
+    }
+
+    const tokens = await AuthServices.refreshToken(token);
+
+    // rotate both cookies so the next refresh works with the new refresh token
+    setAuthCookie(res, tokens);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatusCode.OK,
+      message: 'Access token refreshed successfully',
+      data: tokens,
+    });
+  }
+);
+
 export const AuthControllers = {
   createUser,
   loginUser,
@@ -106,4 +135,5 @@ export const AuthControllers = {
   changePassword,
   logOut,
   updateProfile,
+  refreshToken,
 };
