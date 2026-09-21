@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Note = void 0;
 const mongoose_1 = require("mongoose");
-const blog_interface_1 = require("../blog/blog.interface");
 // same _id → id transform as blog.model.ts, so the frontend keeps receiving
 // `id` instead of `_id`
 const schemaTransform = {
@@ -34,9 +33,11 @@ const noteSchema = new mongoose_1.Schema({
         type: String,
         required: true,
     },
-    type: {
-        type: String,
-        enum: Object.values(blog_interface_1.BlogTypes),
+    // topic axis — the note's own copy of the category, not inherited from the
+    // blog it is attached to
+    category: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: 'Category',
         required: true,
     },
     // written false from day one so going public later is a query change,

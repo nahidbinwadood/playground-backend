@@ -16,6 +16,7 @@ exports.BlogServices = void 0;
 const cloudinary_config_1 = require("../../config/cloudinary.config");
 const appError_1 = require("../../errorHelpers/appError");
 const generateSlug_1 = require("../../utils/generateSlug");
+const category_service_1 = require("../category/category.service");
 const blog_model_1 = require("./blog.model");
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 // get all blogs ==>
@@ -39,6 +40,8 @@ const getSingleBlog = (slug) => __awaiter(void 0, void 0, void 0, function* () {
 });
 // create blogs==>
 const createBlog = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    // a category reference is only worth storing if it resolves ==>
+    yield category_service_1.CategoryServices.assertCategoryExists(payload.category);
     // if the status is draft then is publish will be false otherwise true==>
     if (payload.status) {
         payload.isPublished = Boolean(payload.status === 'PUBLISHED');
@@ -56,6 +59,9 @@ const updateBlog = (_id, payload) => __awaiter(void 0, void 0, void 0, function*
         if (!isExist) {
             throw new appError_1.AppError(http_status_codes_1.default.BAD_REQUEST, 'Blog does not exist');
         }
+        // only when the payload carries one — otherwise a title-only edit would
+        // clear the topic
+        yield category_service_1.CategoryServices.assertCategoryExists(payload.category);
         // modify the slug==>
         if (payload.title) {
             payload.slug = (0, generateSlug_1.generateSlug)(payload.title);

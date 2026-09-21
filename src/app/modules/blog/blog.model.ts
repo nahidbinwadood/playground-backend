@@ -1,6 +1,6 @@
 import { HydratedDocument, model, Schema } from 'mongoose';
 import { generateSlug } from '../../utils/generateSlug';
-import { BlogStatus, BlogTypes, IBlog } from './blog.interface';
+import { BlogStatus, IBlog } from './blog.interface';
 
 const schemaTransform = {
   virtuals: true,
@@ -47,9 +47,11 @@ const blogSchema = new Schema<IBlog>(
       enum: Object.values(BlogStatus),
       default: BlogStatus.DRAFT,
     },
-    type: {
-      type: String,
-      enum: Object.values(BlogTypes),
+    // topic axis — a reference, so a category can be renamed without touching
+    // every blog that uses it
+    category: {
+      type: Schema.Types.ObjectId,
+      ref: 'Category',
       required: true,
     },
     isDeleted: {

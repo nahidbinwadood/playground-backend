@@ -4,6 +4,7 @@ import { BlogRoutes } from '../modules/blog/blog.route';
 import { authRoutes } from '../modules/auth/auth.route';
 import { NoteRoutes } from '../modules/note/note.route';
 import { ReminderRoutes } from '../modules/reminder/reminder.route';
+import { CategoryRoutes } from '../modules/category/category.route';
 
 interface IRoutes {
   path: string;
@@ -33,6 +34,10 @@ const moduleRoutes: IRoutes[] = [
   {
     path: '/reminders',
     route: ReminderRoutes,
+  },
+  {
+    path: '/categories',
+    route: CategoryRoutes,
   },
 ];
 

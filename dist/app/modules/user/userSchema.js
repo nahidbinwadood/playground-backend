@@ -35,7 +35,6 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateUserSchema = exports.changePasswordSchema = exports.loginUserSchema = exports.createUserSchema = void 0;
 const z = __importStar(require("zod"));
-const user_interface_1 = require("./user.interface");
 exports.createUserSchema = z.object({
     name: z
         .string('Name is required')
@@ -45,7 +44,11 @@ exports.createUserSchema = z.object({
         .email('Enter a valid email')
         .min(1, 'Email is required')
         .max(80, 'Email cannot exceed 80 characters'),
-    role: z.enum(['admin', 'user'], 'Role must me admin or user'),
+    // This schema backs POST /auth/create, which is unauthenticated self-service
+    // signup. Letting the client name its own role meant anyone who found the
+    // endpoint could mint an admin account. Admin users are seeded directly in
+    // the database instead, so the role is server-decided here.
+    role: z.literal('user', 'Role must be user').default('user'),
     password: z
         .string('Password is required')
         .min(8, 'Password must be at least 8 characters long')
@@ -75,16 +78,16 @@ exports.changePasswordSchema = z.object({
         .min(8, 'New Password must be at least 8 characters long')
         .max(50, 'New Password cannot exceed 50 characters'),
 });
+// This schema backs PATCH /auth/me, a self-service route guarded only by
+// checkAuth() — any logged-in user reaches it. Offering `role` there let a
+// plain user promote themselves to admin (and isActive/isDeleted let them undo
+// a block or a soft delete), so the privileged fields are no longer
+// client-writable. Identity fields (email) are left out for the same reason:
+// there is no verification flow behind a change of login address.
 exports.updateUserSchema = z.object({
     name: z
         .string('Name is required')
         .min(1, 'Name is required')
         .max(80, 'Name cannot exceed 80 characters')
         .optional(),
-    role: z.enum(['admin', 'user'], 'Role must me admin or user').optional(),
-    email: z.string().optional(),
-    isActive: z
-        .enum(Object.values(user_interface_1.IsActive), `isActive must be between ${Object.values(user_interface_1.IsActive)}`)
-        .optional(),
-    isDeleted: z.boolean().optional(),
 });

@@ -1,6 +1,7 @@
 import { deleteImageFromCloudinary } from '../../config/cloudinary.config';
 import { AppError } from '../../errorHelpers/appError';
 import { generateSlug } from '../../utils/generateSlug';
+import { CategoryServices } from '../category/category.service';
 import { IBlog } from './blog.interface';
 import { Blog } from './blog.model';
 import httpStatusCode from 'http-status-codes';
@@ -36,6 +37,9 @@ const getSingleBlog = async (slug: string) => {
 
 // create blogs==>
 const createBlog = async (payload: Partial<IBlog>) => {
+  // a category reference is only worth storing if it resolves ==>
+  await CategoryServices.assertCategoryExists(payload.category);
+
   // if the status is draft then is publish will be false otherwise true==>
   if (payload.status) {
     payload.isPublished = Boolean(payload.status === 'PUBLISHED');
@@ -56,6 +60,10 @@ const updateBlog = async (_id: string, payload: Partial<IBlog>) => {
     if (!isExist) {
       throw new AppError(httpStatusCode.BAD_REQUEST, 'Blog does not exist');
     }
+
+    // only when the payload carries one — otherwise a title-only edit would
+    // clear the topic
+    await CategoryServices.assertCategoryExists(payload.category);
 
     // modify the slug==>
     if (payload.title) {

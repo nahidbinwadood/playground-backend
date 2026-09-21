@@ -40,9 +40,11 @@ const blogSchema = new mongoose_1.Schema({
         enum: Object.values(blog_interface_1.BlogStatus),
         default: blog_interface_1.BlogStatus.DRAFT,
     },
-    type: {
-        type: String,
-        enum: Object.values(blog_interface_1.BlogTypes),
+    // topic axis — a reference, so a category can be renamed without touching
+    // every blog that uses it
+    category: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: 'Category',
         required: true,
     },
     isDeleted: {

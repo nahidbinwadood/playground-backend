@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import { BlogTypes } from '../blog/blog.interface';
-
-const topicEnum = Object.values(BlogTypes) as [string, ...string[]];
 
 // 24 hex chars — catches a malformed Mongo id before it reaches Mongoose,
 // where it would surface as an opaque CastError
 const blogIdSchema = z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid blog id');
+const categoryIdSchema = z
+  .string('Category is required')
+  .regex(/^[0-9a-fA-F]{24}$/, 'Invalid category id');
 
 // The quick-note form submits blog: null for a standalone entry. An empty
 // string is accepted too (Radix Select cannot use null as an item value) and
@@ -28,7 +28,8 @@ export const createNoteSchema = z.object({
 
   content: z.string('Content is required').min(1, 'Content is required'),
 
-  type: z.enum(topicEnum, `Type must be ${Object.values(BlogTypes).join(',')}`),
+  // the note's own topic — a reference, not a copy of the blog's
+  category: categoryIdSchema,
 
   // not sent by the quick-note form; notes are private from day one. Kept
   // here so a future publishing UI doesn't need a schema change.
@@ -56,9 +57,8 @@ export const updateNoteSchema = z.object({
 
   content: z.string().min(1, 'Content cannot be empty').optional(),
 
-  type: z
-    .enum(topicEnum, `Type must be ${Object.values(BlogTypes).join(',')}`)
-    .optional(),
+  // omitted means "leave the topic alone"
+  category: categoryIdSchema.optional(),
 
   isPublished: z.boolean().optional(),
 });

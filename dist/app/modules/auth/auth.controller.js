@@ -20,8 +20,11 @@ const auth_service_1 = require("./auth.service");
 const setCookie_1 = require("../../utils/setCookie");
 const appError_1 = require("../../errorHelpers/appError");
 // create user==>
+// Unauthenticated self-service signup. The schema already pins role to 'user';
+// pinning it again here keeps the boundary safe on its own terms, so loosening
+// the schema later cannot silently reopen the admin-minting hole.
 const createUser = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield auth_service_1.AuthServices.createUser(req.body);
+    const response = yield auth_service_1.AuthServices.createUser(Object.assign(Object.assign({}, req.body), { role: 'user' }));
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.default.CREATED,

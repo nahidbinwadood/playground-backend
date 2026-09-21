@@ -1,5 +1,11 @@
 import { z } from 'zod';
-import { BlogStatus, BlogTypes } from './blog.interface';
+import { BlogStatus } from './blog.interface';
+
+// 24 hex chars — catches a malformed Mongo id before it reaches Mongoose, where
+// it would surface as an opaque CastError
+const categoryIdSchema = z
+  .string('Category is required')
+  .regex(/^[0-9a-fA-F]{24}$/, 'Invalid category id');
 
 export const createBlogValidationSchema = z.object({
   title: z.string(),
@@ -11,10 +17,7 @@ export const createBlogValidationSchema = z.object({
   coverImage: z.string().optional(),
 
   status: z.enum(Object.values(BlogStatus) as [string, ...string[]]).optional(),
-  type: z.enum(
-    Object.values(BlogTypes) as [string, ...string[]],
-    `Type must be ${Object.values(BlogTypes).join(',')}`
-  ),
+  category: categoryIdSchema,
   author: z.string(),
 });
 
@@ -31,6 +34,8 @@ export const updateBlogValidationSchema = z
     status: z
       .enum(Object.values(BlogStatus) as [string, ...string[]])
       .optional(),
+    // omitted means "leave the category alone"
+    category: categoryIdSchema.optional(),
     isPublished: z.boolean().optional(),
     deleteImageUrl: z.string().optional(),
   })

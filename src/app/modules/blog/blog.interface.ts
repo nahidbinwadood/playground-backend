@@ -5,11 +5,9 @@ export enum BlogStatus {
   PUBLISHED = 'PUBLISHED',
 }
 
-export enum BlogTypes {
-  FRONTEND = 'FRONTEND',
-  BACKEND = 'BACKEND',
-  JAVASCRIPT = 'JAVASCRIPT',
-}
+// BlogTypes used to live here as the topic enum. It is gone: the topic is now a
+// reference to a Category document, and keeping the enum would leave two sources
+// of truth for the same axis.
 
 export interface IBlog {
   title: string;
@@ -19,7 +17,7 @@ export interface IBlog {
   coverImage?: string;
   author: Types.ObjectId;
   status: BlogStatus;
-  type: BlogTypes;
+  category: Types.ObjectId; // ref 'Category' — the topic axis
   isDeleted: boolean;
   isPublished: boolean;
   createdAt?: Date;

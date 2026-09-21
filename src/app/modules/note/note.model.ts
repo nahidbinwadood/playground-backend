@@ -1,5 +1,4 @@
 import { model, Schema } from 'mongoose';
-import { BlogTypes } from '../blog/blog.interface';
 import { INote, NoteModel } from './note.interface';
 
 // same _id → id transform as blog.model.ts, so the frontend keeps receiving
@@ -40,9 +39,11 @@ const noteSchema = new Schema<INote>(
       type: String,
       required: true,
     },
-    type: {
-      type: String,
-      enum: Object.values(BlogTypes),
+    // topic axis — the note's own copy of the category, not inherited from the
+    // blog it is attached to
+    category: {
+      type: Schema.Types.ObjectId,
+      ref: 'Category',
       required: true,
     },
     // written false from day one so going public later is a query change,

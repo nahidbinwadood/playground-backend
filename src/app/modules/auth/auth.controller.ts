@@ -7,9 +7,15 @@ import { removeAuthCookie, setAuthCookie } from '../../utils/setCookie';
 import { AppError } from '../../errorHelpers/appError';
 
 // create user==>
+// Unauthenticated self-service signup. The schema already pins role to 'user';
+// pinning it again here keeps the boundary safe on its own terms, so loosening
+// the schema later cannot silently reopen the admin-minting hole.
 const createUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const response = await AuthServices.createUser(req.body);
+    const response = await AuthServices.createUser({
+      ...req.body,
+      role: 'user',
+    });
 
     sendResponse(res, {
       success: true,

@@ -2,6 +2,7 @@ import { AppError } from '../../errorHelpers/appError';
 import httpStatusCode from 'http-status-codes';
 import { Types } from 'mongoose';
 import { Blog } from '../blog/blog.model';
+import { CategoryServices } from '../category/category.service';
 import { INote } from './note.interface';
 import { Note } from './note.model';
 
@@ -55,6 +56,7 @@ const getSingleNote = async (id: string) => {
 // no Cloudinary, no multipart — notes are plain JSON
 const createNote = async (payload: Partial<INote>) => {
   await assertBlogExists(payload.blog);
+  await CategoryServices.assertCategoryExists(payload.category);
 
   const response = await Note.create(payload);
 
@@ -66,6 +68,7 @@ const createNote = async (payload: Partial<INote>) => {
 // notes carry no image cleanup)
 const updateNote = async (id: string, payload: Partial<INote>) => {
   await assertBlogExists(payload.blog);
+  await CategoryServices.assertCategoryExists(payload.category);
 
   const response = await Note.findOneAndUpdate(
     { _id: id },

@@ -6,6 +6,7 @@ const blog_route_1 = require("../modules/blog/blog.route");
 const auth_route_1 = require("../modules/auth/auth.route");
 const note_route_1 = require("../modules/note/note.route");
 const reminder_route_1 = require("../modules/reminder/reminder.route");
+const category_route_1 = require("../modules/category/category.route");
 const router = (0, express_1.Router)();
 // declare all the routes=>
 const moduleRoutes = [
@@ -28,6 +29,10 @@ const moduleRoutes = [
     {
         path: '/reminders',
         route: reminder_route_1.ReminderRoutes,
+    },
+    {
+        path: '/categories',
+        route: category_route_1.CategoryRoutes,
     },
 ];
 moduleRoutes === null || moduleRoutes === void 0 ? void 0 : moduleRoutes.map((routes) => router.use(routes.path, routes.route));

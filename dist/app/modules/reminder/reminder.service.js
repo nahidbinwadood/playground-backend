@@ -96,10 +96,46 @@ const computeStreak = (todayKey) => __awaiter(void 0, void 0, void 0, function* 
     }
     return streak;
 });
-const MESSAGE_BY_SLOT = {
-    '18': (streak) => `📘 Daily log not written yet — ${streak}-day streak on the line.`,
-    '22': (streak) => `⚠️ 2 hours left. Still nothing logged today. ${streak}-day streak at risk.`,
-    '23': (streak) => `🚨 Last call — 1 hour to keep your ${streak}-day streak. Log it now.`,
+// ---------------------------------------------------------------------------
+// message copy
+//
+// Plain text on purpose — sendTelegram sends no parse_mode, so emoji, newlines
+// and the arrow pass through untouched. MarkdownV2 would require escaping a
+// dozen characters and one missed escape fails the send outright.
+//
+// Every message carries the same three things in the same order: which slot
+// this is, what is missing, and what it costs. The streak line is the reason
+// the message lands at all, so it is never folded into the sentence above it.
+// ---------------------------------------------------------------------------
+const SLOT_COPY = {
+    '18': {
+        header: '📘 Daily log · 18:00',
+        body: 'Nothing has been logged today yet.',
+    },
+    '22': {
+        header: '⏳ Daily log · 22:00',
+        body: 'Two hours left, and today is still empty.',
+    },
+    '23': {
+        header: '🚨 Daily log · 23:00',
+        body: 'Last hour, and today is still empty.',
+    },
+};
+const buildMessage = (slot, streak) => {
+    const { header, body } = SLOT_COPY[slot];
+    // A streak of 0 is not "at risk" — there is nothing to lose yet, and saying
+    // otherwise trains the reader to ignore the number.
+    const streakLine = streak > 0
+        ? `🔥 Streak at risk: ${streak} ${streak === 1 ? 'day' : 'days'}`
+        : '🌱 No streak yet — today starts one';
+    return [
+        header,
+        '',
+        body,
+        streakLine,
+        '',
+        'Write one takeaway → /admin/notes',
+    ].join('\n');
 };
 const runReminderCheck = () => __awaiter(void 0, void 0, void 0, function* () {
     const now = new Date();
@@ -145,7 +181,7 @@ const runReminderCheck = () => __awaiter(void 0, void 0, void 0, function* () {
     }
     // 7. send
     try {
-        yield (0, sendTelegram_1.sendTelegram)(MESSAGE_BY_SLOT[slot](streak));
+        yield (0, sendTelegram_1.sendTelegram)(buildMessage(slot, streak));
     }
     catch (error) {
         yield reminder_model_1.ReminderLog.deleteOne({ _id: claim._id });

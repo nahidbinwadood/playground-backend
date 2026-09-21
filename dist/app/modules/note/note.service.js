@@ -16,6 +16,7 @@ exports.NoteServices = void 0;
 const appError_1 = require("../../errorHelpers/appError");
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const blog_model_1 = require("../blog/blog.model");
+const category_service_1 = require("../category/category.service");
 const note_model_1 = require("./note.model");
 // a note pointing at a nonexistent blog id would otherwise silently break the
 // tracker's blog grouping — verify the reference on create and update ==>
@@ -52,6 +53,7 @@ const getSingleNote = (id) => __awaiter(void 0, void 0, void 0, function* () {
 // no Cloudinary, no multipart — notes are plain JSON
 const createNote = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     yield assertBlogExists(payload.blog);
+    yield category_service_1.CategoryServices.assertCategoryExists(payload.category);
     const response = yield note_model_1.Note.create(payload);
     return response;
 });
@@ -60,6 +62,7 @@ const createNote = (payload) => __awaiter(void 0, void 0, void 0, function* () {
 // notes carry no image cleanup)
 const updateNote = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
     yield assertBlogExists(payload.blog);
+    yield category_service_1.CategoryServices.assertCategoryExists(payload.category);
     const response = yield note_model_1.Note.findOneAndUpdate({ _id: id }, Object.assign({}, payload), {
         returnDocument: 'after',
         runValidators: true,
