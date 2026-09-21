@@ -29,7 +29,7 @@ const corsOptions = {
 };
 
 // middlewares==>
-app.use(express.urlencoded({ extended: true, }));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser()); // required to read the httpOnly refreshToken cookie in /auth/refresh-token
 app.use(cors(corsOptions));
