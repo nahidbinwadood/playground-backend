@@ -16,6 +16,7 @@ const allowedOrigins = [
   envVars.FRONTEND_URL_LOCAL,
   envVars.FRONTEND_URL_PRODUCTION,
 ].filter(Boolean) as string[];
+ 
 
 const corsOptions = {
   origin: (origin: string | undefined, callback: any) => {
