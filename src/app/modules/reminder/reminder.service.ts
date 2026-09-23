@@ -171,16 +171,28 @@ export interface IReminderCheckResult {
     | 'before_first_slot'
     | 'already_sent';
   streak: number | null;
+  // The wall clock the decision was made on. A scheduler running in the wrong
+  // timezone still gets HTTP 200, so echoing this back is what turns a
+  // confusing `before_first_slot` into an obvious timezone mismatch.
+  now: {
+    dateKey: string;
+    hour: number;
+    minute: number;
+    timeZone: string;
+  };
 }
 
 const runReminderCheck = async (): Promise<IReminderCheckResult> => {
   const now = new Date();
-  const { dateKey, hour } = zonedNow();
+  const { dateKey, hour, minute } = zonedNow();
+
+  // echoed on every result so a mis-scheduled cron job is self-diagnosing
+  const clock = { dateKey, hour, minute, timeZone: timeZone() };
 
   // 1. pause check — a holiday should not produce three guilt messages a day
   const setting = await ReminderSetting.findOne();
   if (setting?.pauseUntil && setting.pauseUntil > now) {
-    return { sent: false, slot: null, reason: 'paused', streak: null };
+    return { sent: false, slot: null, reason: 'paused', streak: null, now: clock };
   }
 
   // 2. activity check — any note touched inside today's Dhaka window means the
@@ -189,7 +201,13 @@ const runReminderCheck = async (): Promise<IReminderCheckResult> => {
   const activeToday = await countActiveNotesBetween(dayStart, now);
 
   if (activeToday > 0) {
-    return { sent: false, slot: null, reason: 'already_logged', streak: null };
+    return {
+      sent: false,
+      slot: null,
+      reason: 'already_logged',
+      streak: null,
+      now: clock,
+    };
   }
 
   // 3. the most recent slot boundary at or before now — deriving it this way
@@ -199,13 +217,25 @@ const runReminderCheck = async (): Promise<IReminderCheckResult> => {
     hour >= 23 ? '23' : hour >= 22 ? '22' : hour >= 18 ? '18' : null;
 
   if (!slot) {
-    return { sent: false, slot: null, reason: 'before_first_slot', streak: null };
+    return {
+      sent: false,
+      slot: null,
+      reason: 'before_first_slot',
+      streak: null,
+      now: clock,
+    };
   }
 
   // 4. idempotency — a claim for this day+slot means the message already went out
   const existingClaim = await ReminderLog.findOne({ dateKey, slot });
   if (existingClaim) {
-    return { sent: false, slot, reason: 'already_sent', streak: null };
+    return {
+      sent: false,
+      slot,
+      reason: 'already_sent',
+      streak: null,
+      now: clock,
+    };
   }
 
   // 5. the streak at risk
@@ -219,7 +249,7 @@ const runReminderCheck = async (): Promise<IReminderCheckResult> => {
   } catch (error: any) {
     // lost a race with a parallel invocation — treat as already sent
     if (error?.code === 11000) {
-      return { sent: false, slot, reason: 'already_sent', streak };
+      return { sent: false, slot, reason: 'already_sent', streak, now: clock };
     }
     throw error;
   }
@@ -233,7 +263,7 @@ const runReminderCheck = async (): Promise<IReminderCheckResult> => {
   }
 
   // 8. summary — this is how the job is debugged from cron-job.org's response view
-  return { sent: true, slot, reason: 'sent', streak };
+  return { sent: true, slot, reason: 'sent', streak, now: clock };
 };
 
 export const ReminderServices = {

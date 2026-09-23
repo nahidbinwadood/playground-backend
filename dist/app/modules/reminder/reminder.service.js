@@ -139,30 +139,50 @@ const buildMessage = (slot, streak) => {
 };
 const runReminderCheck = () => __awaiter(void 0, void 0, void 0, function* () {
     const now = new Date();
-    const { dateKey, hour } = zonedNow();
+    const { dateKey, hour, minute } = zonedNow();
+    // echoed on every result so a mis-scheduled cron job is self-diagnosing
+    const clock = { dateKey, hour, minute, timeZone: timeZone() };
     // 1. pause check — a holiday should not produce three guilt messages a day
     const setting = yield reminder_model_1.ReminderSetting.findOne();
     if ((setting === null || setting === void 0 ? void 0 : setting.pauseUntil) && setting.pauseUntil > now) {
-        return { sent: false, slot: null, reason: 'paused', streak: null };
+        return { sent: false, slot: null, reason: 'paused', streak: null, now: clock };
     }
     // 2. activity check — any note touched inside today's Dhaka window means the
     //    day is already logged
     const { start: dayStart } = zonedDayRange(dateKey);
     const activeToday = yield countActiveNotesBetween(dayStart, now);
     if (activeToday > 0) {
-        return { sent: false, slot: null, reason: 'already_logged', streak: null };
+        return {
+            sent: false,
+            slot: null,
+            reason: 'already_logged',
+            streak: null,
+            now: clock,
+        };
     }
     // 3. the most recent slot boundary at or before now — deriving it this way
     //    (instead of matching an exact hour) makes a late or retried invocation
     //    self-correct instead of falling through a gap
     const slot = hour >= 23 ? '23' : hour >= 22 ? '22' : hour >= 18 ? '18' : null;
     if (!slot) {
-        return { sent: false, slot: null, reason: 'before_first_slot', streak: null };
+        return {
+            sent: false,
+            slot: null,
+            reason: 'before_first_slot',
+            streak: null,
+            now: clock,
+        };
     }
     // 4. idempotency — a claim for this day+slot means the message already went out
     const existingClaim = yield reminder_model_1.ReminderLog.findOne({ dateKey, slot });
     if (existingClaim) {
-        return { sent: false, slot, reason: 'already_sent', streak: null };
+        return {
+            sent: false,
+            slot,
+            reason: 'already_sent',
+            streak: null,
+            now: clock,
+        };
     }
     // 5. the streak at risk
     const streak = yield computeStreak(dateKey);
@@ -175,7 +195,7 @@ const runReminderCheck = () => __awaiter(void 0, void 0, void 0, function* () {
     catch (error) {
         // lost a race with a parallel invocation — treat as already sent
         if ((error === null || error === void 0 ? void 0 : error.code) === 11000) {
-            return { sent: false, slot, reason: 'already_sent', streak };
+            return { sent: false, slot, reason: 'already_sent', streak, now: clock };
         }
         throw error;
     }
@@ -188,7 +208,7 @@ const runReminderCheck = () => __awaiter(void 0, void 0, void 0, function* () {
         throw error;
     }
     // 8. summary — this is how the job is debugged from cron-job.org's response view
-    return { sent: true, slot, reason: 'sent', streak };
+    return { sent: true, slot, reason: 'sent', streak, now: clock };
 });
 exports.ReminderServices = {
     runReminderCheck,

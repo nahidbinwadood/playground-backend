@@ -8,19 +8,33 @@ let server: Server;
 const PORT = envVars.PORT;
 const DB_URL = envVars.DB_URL;
 
+// Vercel runs this file as a serverless function: the platform bridges requests
+// straight into `app`, so there is no port to listen on and no process to keep
+// alive between invocations.
+const isServerless = Boolean(process.env.VERCEL);
+
 const startServer = async () => {
   try {
     await connectDB(DB_URL);
-    server = app.listen(PORT, () => {
-      console.info(`🚀 Server started successfully`);
-      console.info(`📡 Listening on port: ${PORT}`);
-      console.info(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-    });
   } catch (error) {
-    console.error('❌ Failed to start the server');
+    // Deliberately not fatal. A cold container that cannot reach Atlas should
+    // fail only the request that needs the database (checkDBConnection answers
+    // 503) and retry on the next one, instead of killing the whole invocation.
+    console.error(
+      '❌ Initial database connection failed — will retry per request'
+    );
     console.error(error);
-    process.exit(1);
   }
+
+  if (isServerless) {
+    return;
+  }
+
+  server = app.listen(PORT, () => {
+    console.info(`🚀 Server started successfully`);
+    console.info(`📡 Listening on port: ${PORT}`);
+    console.info(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  });
 };
 
 startServer();

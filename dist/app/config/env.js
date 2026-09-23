@@ -51,6 +51,7 @@ const loadEnvironmentVariables = () => {
         TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID,
         REMINDER_SECRET: process.env.REMINDER_SECRET,
         REMINDER_TZ: process.env.REMINDER_TZ,
+        CRON_SECRET: process.env.CRON_SECRET,
     };
 };
 exports.envVars = loadEnvironmentVariables();

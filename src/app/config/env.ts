@@ -20,6 +20,10 @@ interface IEnvVariables {
   TELEGRAM_CHAT_ID: string;
   REMINDER_SECRET: string;
   REMINDER_TZ: string;
+  // optional — only set on Vercel, which injects it as `Authorization: Bearer
+  // <CRON_SECRET>` on cron invocations. Deliberately NOT required: local dev and
+  // any non-Vercel host must keep booting without it.
+  CRON_SECRET?: string;
 }
 
 const loadEnvironmentVariables = (): IEnvVariables => {
@@ -72,6 +76,7 @@ const loadEnvironmentVariables = (): IEnvVariables => {
     TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID as string,
     REMINDER_SECRET: process.env.REMINDER_SECRET as string,
     REMINDER_TZ: process.env.REMINDER_TZ as string,
+    CRON_SECRET: process.env.CRON_SECRET,
   };
 };
 

@@ -31,7 +31,7 @@ const corsOptions = {
     credentials: true,
 };
 // middlewares==>
-app.use(express_1.default.urlencoded({ extended: true, }));
+app.use(express_1.default.urlencoded({ extended: true }));
 app.use(express_1.default.json());
 app.use((0, cookie_parser_1.default)()); // required to read the httpOnly refreshToken cookie in /auth/refresh-token
 app.use((0, cors_1.default)(corsOptions));
