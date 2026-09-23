@@ -1,5 +1,4 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "builds": [
     {
@@ -17,14 +16,6 @@
     {
       "path": "/api/v1/reminders/check",
       "schedule": "0 12 * * *"
-    },
-    {
-      "path": "/api/v1/reminders/check",
-      "schedule": "0 16 * * *"
-    },
-    {
-      "path": "/api/v1/reminders/check",
-      "schedule": "0 17 * * *"
     }
   ]
 }
