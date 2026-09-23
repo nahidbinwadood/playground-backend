@@ -11,11 +11,5 @@
       "src": "/(.*)",
       "dest": "dist/server.js"
     }
-  ],
-  "crons": [
-    {
-      "path": "/api/v1/reminders/check",
-      "schedule": "0 12 * * *"
-    }
   ]
 }
