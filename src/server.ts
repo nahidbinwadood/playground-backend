@@ -8,11 +8,6 @@ let server: Server;
 const PORT = envVars.PORT;
 const DB_URL = envVars.DB_URL;
 
-// Vercel runs this file as a serverless function: the platform bridges requests
-// straight into `app`, so there is no port to listen on and no process to keep
-// alive between invocations.
-const isServerless = Boolean(process.env.VERCEL);
-
 const startServer = async () => {
   try {
     await connectDB(DB_URL);
@@ -24,10 +19,6 @@ const startServer = async () => {
       '❌ Initial database connection failed — will retry per request'
     );
     console.error(error);
-  }
-
-  if (isServerless) {
-    return;
   }
 
   server = app.listen(PORT, () => {
