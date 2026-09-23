@@ -2,14 +2,22 @@
   "version": 2,
   "builds": [
     {
-      "src": "dist/server.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
       "src": "/(.*)",
       "dest": "dist/server.js"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/v1/reminders/check",
+      "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/v1/reminders/check",
+      "schedule": "0 16 * * *"
+    },
+    {
+      "path": "/api/v1/reminders/check",
+      "schedule": "0 17 * * *"
     }
   ]
 }
