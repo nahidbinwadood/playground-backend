@@ -76,6 +76,16 @@ const getSingleNote = (0, catchAsync_1.default)((req, res, next) => __awaiter(vo
         data: response,
     });
 }));
+// completed notes — public, powers the homepage ==>
+const getCompleteNotes = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield note_service_1.NoteServices.getCompleteNotes();
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: http_status_codes_1.default.OK,
+        message: 'Completed Notes Fetched Successfully',
+        data: response,
+    });
+}));
 // update note ==>
 const updateNote = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
@@ -111,6 +121,7 @@ const deleteNote = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 
 }));
 exports.NoteControllers = {
     createNote,
+    getCompleteNotes,
     getAllNotes,
     getNotesByBlog,
     getSingleNote,

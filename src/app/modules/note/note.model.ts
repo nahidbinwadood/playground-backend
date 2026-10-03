@@ -1,5 +1,5 @@
 import { model, Schema } from 'mongoose';
-import { INote, NoteModel } from './note.interface';
+import { INote, NoteModel, NOTE_STATUSES } from './note.interface';
 
 // same _id → id transform as blog.model.ts, so the frontend keeps receiving
 // `id` instead of `_id`
@@ -46,6 +46,14 @@ const noteSchema = new Schema<INote>(
       ref: 'Category',
       required: true,
     },
+    // the lifecycle flag. Defaults to DRAFT on purpose: every note that already
+    // exists, and every new one, stays private until it is explicitly completed.
+    status: {
+      type: String,
+      enum: NOTE_STATUSES,
+      default: 'DRAFT',
+    },
+
     // written false from day one so going public later is a query change,
     // not a migration
     isPublished: {

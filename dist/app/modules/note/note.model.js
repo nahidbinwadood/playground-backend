@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Note = void 0;
 const mongoose_1 = require("mongoose");
+const note_interface_1 = require("./note.interface");
 // same _id → id transform as blog.model.ts, so the frontend keeps receiving
 // `id` instead of `_id`
 const schemaTransform = {
@@ -39,6 +40,13 @@ const noteSchema = new mongoose_1.Schema({
         type: mongoose_1.Schema.Types.ObjectId,
         ref: 'Category',
         required: true,
+    },
+    // the lifecycle flag. Defaults to DRAFT on purpose: every note that already
+    // exists, and every new one, stays private until it is explicitly completed.
+    status: {
+        type: String,
+        enum: note_interface_1.NOTE_STATUSES,
+        default: 'DRAFT',
     },
     // written false from day one so going public later is a query change,
     // not a migration

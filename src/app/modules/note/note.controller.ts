@@ -86,6 +86,20 @@ const getSingleNote = catchAsync(
   }
 );
 
+// completed notes — public, powers the homepage ==>
+const getCompleteNotes = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const response = await NoteServices.getCompleteNotes();
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatusCode.OK,
+      message: 'Completed Notes Fetched Successfully',
+      data: response,
+    });
+  }
+);
+
 // update note ==>
 const updateNote = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -135,6 +149,7 @@ const deleteNote = catchAsync(
 
 export const NoteControllers = {
   createNote,
+  getCompleteNotes,
   getAllNotes,
   getNotesByBlog,
   getSingleNote,

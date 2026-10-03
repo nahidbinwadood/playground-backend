@@ -52,6 +52,13 @@ const getSingleNote = async (id: string) => {
   return response;
 };
 
+// completed notes — the one public read ==>
+// No auth sits on this handler, so the status filter IS the privacy boundary:
+// a DRAFT must never be reachable through it. Keep this predicate exact.
+const getCompleteNotes = async () => {
+  return await Note.find({ status: 'COMPLETE' }).sort({ createdAt: -1 });
+};
+
 // create note ==>
 // no Cloudinary, no multipart — notes are plain JSON
 const createNote = async (payload: Partial<INote>) => {
@@ -98,6 +105,7 @@ const deleteNote = async (id: string) => {
 };
 
 export const NoteServices = {
+  getCompleteNotes,
   getAllNotes,
   getNotesByBlog,
   getSingleNote,

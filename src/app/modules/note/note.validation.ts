@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { NOTE_STATUSES } from './note.interface';
 
 // 24 hex chars — catches a malformed Mongo id before it reaches Mongoose,
 // where it would surface as an opaque CastError
@@ -31,6 +32,10 @@ export const createNoteSchema = z.object({
   // the note's own topic — a reference, not a copy of the blog's
   category: categoryIdSchema,
 
+  // Optional: the quick-note form never sends it, and the model defaults a new
+  // note to DRAFT, so omitting it is always safe.
+  status: z.enum(NOTE_STATUSES).optional(),
+
   // not sent by the quick-note form; notes are private from day one. Kept
   // here so a future publishing UI doesn't need a schema change.
   isPublished: z.boolean().optional(),
@@ -59,6 +64,10 @@ export const updateNoteSchema = z.object({
 
   // omitted means "leave the topic alone"
   category: categoryIdSchema.optional(),
+
+  // omitted means "leave the status alone" — this is what the card's
+  // Mark complete / Mark draft action sends, a single-key PATCH
+  status: z.enum(NOTE_STATUSES).optional(),
 
   isPublished: z.boolean().optional(),
 });

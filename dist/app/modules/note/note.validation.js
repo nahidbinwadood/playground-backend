@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateNoteSchema = exports.createNoteSchema = void 0;
 const zod_1 = require("zod");
+const note_interface_1 = require("./note.interface");
 // 24 hex chars — catches a malformed Mongo id before it reaches Mongoose,
 // where it would surface as an opaque CastError
 const blogIdSchema = zod_1.z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid blog id');
@@ -27,6 +28,9 @@ exports.createNoteSchema = zod_1.z.object({
     content: zod_1.z.string('Content is required').min(1, 'Content is required'),
     // the note's own topic — a reference, not a copy of the blog's
     category: categoryIdSchema,
+    // Optional: the quick-note form never sends it, and the model defaults a new
+    // note to DRAFT, so omitting it is always safe.
+    status: zod_1.z.enum(note_interface_1.NOTE_STATUSES).optional(),
     // not sent by the quick-note form; notes are private from day one. Kept
     // here so a future publishing UI doesn't need a schema change.
     isPublished: zod_1.z.boolean().optional(),
@@ -50,5 +54,8 @@ exports.updateNoteSchema = zod_1.z.object({
     content: zod_1.z.string().min(1, 'Content cannot be empty').optional(),
     // omitted means "leave the topic alone"
     category: categoryIdSchema.optional(),
+    // omitted means "leave the status alone" — this is what the card's
+    // Mark complete / Mark draft action sends, a single-key PATCH
+    status: zod_1.z.enum(note_interface_1.NOTE_STATUSES).optional(),
     isPublished: zod_1.z.boolean().optional(),
 });

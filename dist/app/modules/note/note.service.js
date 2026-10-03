@@ -49,6 +49,12 @@ const getSingleNote = (id) => __awaiter(void 0, void 0, void 0, function* () {
     }
     return response;
 });
+// completed notes — the one public read ==>
+// No auth sits on this handler, so the status filter IS the privacy boundary:
+// a DRAFT must never be reachable through it. Keep this predicate exact.
+const getCompleteNotes = () => __awaiter(void 0, void 0, void 0, function* () {
+    return yield note_model_1.Note.find({ status: 'COMPLETE' }).sort({ createdAt: -1 });
+});
 // create note ==>
 // no Cloudinary, no multipart — notes are plain JSON
 const createNote = (payload) => __awaiter(void 0, void 0, void 0, function* () {
@@ -81,6 +87,7 @@ const deleteNote = (id) => __awaiter(void 0, void 0, void 0, function* () {
     return response;
 });
 exports.NoteServices = {
+    getCompleteNotes,
     getAllNotes,
     getNotesByBlog,
     getSingleNote,

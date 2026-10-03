@@ -18,6 +18,10 @@ router.get('/', (0, checkAuth_1.default)('admin'), note_controller_1.NoteControl
 // MUST be declared before /:id — otherwise Express matches the literal "blog"
 // as :id and every by-blog lookup 404s
 router.get('/blog/:blogId', (0, checkAuth_1.default)('admin'), note_controller_1.NoteControllers.getNotesByBlog);
+// completed notes — PUBLIC, deliberately no checkAuth: this is the only note
+// endpoint the signed-out homepage can reach, and status is the gate.
+// Declared before /:id so Express never matches the literal "complete" as an id.
+router.get('/complete', note_controller_1.NoteControllers.getCompleteNotes);
 // get single note ==>
 router.get('/:id', (0, checkAuth_1.default)('admin'), note_controller_1.NoteControllers.getSingleNote);
 // update note ==>
