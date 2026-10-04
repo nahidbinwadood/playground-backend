@@ -9,4 +9,7 @@ const router = Router();
 // Never leave this unprotected.
 router.get('/check', ReminderControllers.checkReminders);
 
+// demo — sends a test message on every call (same secret). Remove when done.
+router.get('/demo', ReminderControllers.sendDemo);
+
 export const ReminderRoutes = router;

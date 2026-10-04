@@ -9,4 +9,6 @@ const router = (0, express_1.Router)();
 // header (external scheduler) or Vercel Cron's Authorization: Bearer header.
 // Never leave this unprotected.
 router.get('/check', reminder_controller_1.ReminderControllers.checkReminders);
+// demo — sends a test message on every call (same secret). Remove when done.
+router.get('/demo', reminder_controller_1.ReminderControllers.sendDemo);
 exports.ReminderRoutes = router;

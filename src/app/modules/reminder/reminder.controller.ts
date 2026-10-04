@@ -6,6 +6,7 @@ import httpStatusCode from 'http-status-codes';
 import { AppError } from '../../errorHelpers/appError';
 import { envVars } from '../../config/env';
 import { ReminderServices } from './reminder.service';
+import { sendTelegram } from '../../utils/sendTelegram';
 
 // Constant-time secret comparison. Timing-safe equality stops response timing
 // from leaking the secret character by character. The length check comes first
@@ -18,6 +19,29 @@ const secretMatches = (provided: string, expected: string): boolean => {
     providedBuffer.length === expectedBuffer.length &&
     crypto.timingSafeEqual(providedBuffer, expectedBuffer)
   );
+};
+
+// Throws 401 unless the request carries a valid scheduler credential.
+// Shared by /check and /demo so both are gated identically.
+const assertScheduler = (req: Request) => {
+  const secretHeader = req.headers['x-reminder-secret'];
+  const authHeader = req.headers['authorization'];
+
+  const hasValidReminderSecret =
+    typeof secretHeader === 'string' &&
+    secretMatches(secretHeader, envVars.REMINDER_SECRET);
+
+  // Vercel only sends the header if CRON_SECRET is configured; without it the
+  // bearer path stays closed rather than matching an empty secret.
+  const cronSecret = envVars.CRON_SECRET;
+  const hasValidCronBearer =
+    Boolean(cronSecret) &&
+    typeof authHeader === 'string' &&
+    secretMatches(authHeader, `Bearer ${cronSecret}`);
+
+  if (!hasValidReminderSecret && !hasValidCronBearer) {
+    throw new AppError(httpStatusCode.UNAUTHORIZED, 'Invalid reminder secret');
+  }
 };
 
 // check reminders — called by a scheduler (Vercel Cron, or an external one) ==>
@@ -34,27 +58,7 @@ const checkReminders = catchAsync(
     //      env var exists on the project.
     //
     // Either one is sufficient, and neither is ever compared with ===.
-    const secretHeader = req.headers['x-reminder-secret'];
-    const authHeader = req.headers['authorization'];
-
-    const hasValidReminderSecret =
-      typeof secretHeader === 'string' &&
-      secretMatches(secretHeader, envVars.REMINDER_SECRET);
-
-    // Vercel only sends the header if CRON_SECRET is configured; without it the
-    // bearer path stays closed rather than matching an empty secret.
-    const cronSecret = envVars.CRON_SECRET;
-    const hasValidCronBearer =
-      Boolean(cronSecret) &&
-      typeof authHeader === 'string' &&
-      secretMatches(authHeader, `Bearer ${cronSecret}`);
-
-    if (!hasValidReminderSecret && !hasValidCronBearer) {
-      throw new AppError(
-        httpStatusCode.UNAUTHORIZED,
-        'Invalid reminder secret'
-      );
-    }
+    assertScheduler(req);
 
     const result = await ReminderServices.runReminderCheck();
 
@@ -69,6 +73,28 @@ const checkReminders = catchAsync(
   }
 );
 
+// demo ping — sends a timestamped test message on every call, no slot or
+// note checks. For trying out a scheduler (e.g. cron-job.org every minute).
+// Same secret as /check, so strangers cannot spam the chat.
+const sendDemo = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    assertScheduler(req);
+
+    const sentAt = new Date().toLocaleString('en-GB', {
+      timeZone: envVars.REMINDER_TZ,
+    });
+    await sendTelegram(`🧪 Demo ping — ${sentAt} (${envVars.REMINDER_TZ})`);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatusCode.OK,
+      message: 'Demo message sent',
+      data: { sentAt },
+    });
+  }
+);
+
 export const ReminderControllers = {
   checkReminders,
+  sendDemo,
 };

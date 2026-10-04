@@ -20,6 +20,7 @@ const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const appError_1 = require("../../errorHelpers/appError");
 const env_1 = require("../../config/env");
 const reminder_service_1 = require("./reminder.service");
+const sendTelegram_1 = require("../../utils/sendTelegram");
 // Constant-time secret comparison. Timing-safe equality stops response timing
 // from leaking the secret character by character. The length check comes first
 // because timingSafeEqual throws on unequal lengths.
@@ -28,6 +29,23 @@ const secretMatches = (provided, expected) => {
     const expectedBuffer = Buffer.from(expected);
     return (providedBuffer.length === expectedBuffer.length &&
         crypto_1.default.timingSafeEqual(providedBuffer, expectedBuffer));
+};
+// Throws 401 unless the request carries a valid scheduler credential.
+// Shared by /check and /demo so both are gated identically.
+const assertScheduler = (req) => {
+    const secretHeader = req.headers['x-reminder-secret'];
+    const authHeader = req.headers['authorization'];
+    const hasValidReminderSecret = typeof secretHeader === 'string' &&
+        secretMatches(secretHeader, env_1.envVars.REMINDER_SECRET);
+    // Vercel only sends the header if CRON_SECRET is configured; without it the
+    // bearer path stays closed rather than matching an empty secret.
+    const cronSecret = env_1.envVars.CRON_SECRET;
+    const hasValidCronBearer = Boolean(cronSecret) &&
+        typeof authHeader === 'string' &&
+        secretMatches(authHeader, `Bearer ${cronSecret}`);
+    if (!hasValidReminderSecret && !hasValidCronBearer) {
+        throw new appError_1.AppError(http_status_codes_1.default.UNAUTHORIZED, 'Invalid reminder secret');
+    }
 };
 // check reminders — called by a scheduler (Vercel Cron, or an external one) ==>
 const checkReminders = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -42,19 +60,7 @@ const checkReminders = (0, catchAsync_1.default)((req, res, next) => __awaiter(v
     //      env var exists on the project.
     //
     // Either one is sufficient, and neither is ever compared with ===.
-    const secretHeader = req.headers['x-reminder-secret'];
-    const authHeader = req.headers['authorization'];
-    const hasValidReminderSecret = typeof secretHeader === 'string' &&
-        secretMatches(secretHeader, env_1.envVars.REMINDER_SECRET);
-    // Vercel only sends the header if CRON_SECRET is configured; without it the
-    // bearer path stays closed rather than matching an empty secret.
-    const cronSecret = env_1.envVars.CRON_SECRET;
-    const hasValidCronBearer = Boolean(cronSecret) &&
-        typeof authHeader === 'string' &&
-        secretMatches(authHeader, `Bearer ${cronSecret}`);
-    if (!hasValidReminderSecret && !hasValidCronBearer) {
-        throw new appError_1.AppError(http_status_codes_1.default.UNAUTHORIZED, 'Invalid reminder secret');
-    }
+    assertScheduler(req);
     const result = yield reminder_service_1.ReminderServices.runReminderCheck();
     (0, sendResponse_1.default)(res, {
         success: true,
@@ -65,6 +71,23 @@ const checkReminders = (0, catchAsync_1.default)((req, res, next) => __awaiter(v
         data: result,
     });
 }));
+// demo ping — sends a timestamped test message on every call, no slot or
+// note checks. For trying out a scheduler (e.g. cron-job.org every minute).
+// Same secret as /check, so strangers cannot spam the chat.
+const sendDemo = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    assertScheduler(req);
+    const sentAt = new Date().toLocaleString('en-GB', {
+        timeZone: env_1.envVars.REMINDER_TZ,
+    });
+    yield (0, sendTelegram_1.sendTelegram)(`🧪 Demo ping — ${sentAt} (${env_1.envVars.REMINDER_TZ})`);
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: http_status_codes_1.default.OK,
+        message: 'Demo message sent',
+        data: { sentAt },
+    });
+}));
 exports.ReminderControllers = {
     checkReminders,
+    sendDemo,
 };
