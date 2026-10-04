@@ -26,13 +26,6 @@ const globalErrorHandler = async (
   let message = 'Something Went Wrong';
   let errors: Record<string, any> | undefined;
 
-  // console.log('🔴 Error caught by global handler:', {
-  //   name: err.name,
-  //   message: err.message,
-  //   type: err.constructor.name,
-  //   stack: err.stack,
-  // });
-
   // path only set once upload succeeded; a delete failure must not mask the original error
   if (req.file?.path) {
     try {
@@ -146,6 +139,21 @@ const globalErrorHandler = async (
     message = 'An unexpected error occurred';
     console.log('✓ Handled as Unknown Error');
   }
+
+  // One structured line per error so Vercel logs are searchable. Bodies and
+  // headers are never logged (they carry passwords and tokens); the stack is
+  // only worth the noise for unexpected 5xx failures.
+  console.error(
+    JSON.stringify({
+      level: 'error',
+      method: req.method,
+      path: req.originalUrl,
+      statusCode,
+      name: err?.name,
+      message,
+      ...(statusCode >= 500 && { stack: err?.stack }),
+    })
+  );
 
   // ============ SEND RESPONSE ============
   const errorResponse: IErrorResponse = {

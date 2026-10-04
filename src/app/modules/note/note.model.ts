@@ -69,4 +69,11 @@ const noteSchema = new Schema<INote>(
   }
 );
 
+// public GET /notes/complete: find({ status: 'COMPLETE' }).sort({ createdAt: -1 })
+noteSchema.index({ status: 1, createdAt: -1 });
+// notes of one blog: find({ blog }).sort({ createdAt: -1 })
+noteSchema.index({ blog: 1, createdAt: -1 });
+// admin list of all notes: find({}).sort({ createdAt: -1 })
+noteSchema.index({ createdAt: -1 });
+
 export const Note = model<INote, NoteModel>('Note', noteSchema);

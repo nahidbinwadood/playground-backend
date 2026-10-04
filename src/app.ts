@@ -1,13 +1,14 @@
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import express, { Application, Request, Response } from 'express';
+import helmet from 'helmet';
 import httpStatusCode from 'http-status-codes';
 import checkDBConnection from './app/middlewares/checkDBConnection';
 import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import notFound from './app/middlewares/notFound';
 import router from './app/routes/router';
 import sendResponse from './app/utils/sendResponse';
-import { getDBStatus } from './app/db/connectDB';
+import { connectDB, getDBStatus } from './app/db/connectDB';
 import { envVars } from './app/config/env';
 
 const app: Application = express();
@@ -29,6 +30,8 @@ const corsOptions = {
 };
 
 // middlewares==>
+// security headers first so every response, including errors, carries them
+app.use(helmet());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser()); // required to read the httpOnly refreshToken cookie in /auth/refresh-token
@@ -47,7 +50,17 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 // health check endpoint
-app.get('/health', (req: Request, res: Response) => {
+// A cold serverless instance has not connected yet, so reporting the current
+// state alone would answer 503 while the database is actually fine. Try to
+// connect first, then report what is true.
+app.get('/health', async (req: Request, res: Response) => {
+  if (!getDBStatus()) {
+    try {
+      await connectDB(envVars.DB_URL);
+    } catch {
+      // connectDB already logged it; fall through and report disconnected
+    }
+  }
   const dbStatus = getDBStatus();
 
   sendResponse(res, {

@@ -75,6 +75,10 @@ const blogSchema = new Schema<IBlog>(
   }
 );
 
+// public blog list: find({ isPublished: true, isDeleted: { $ne: true } })
+// .sort({ createdAt: -1 }); slug lookups already use slug's unique index
+blogSchema.index({ isPublished: 1, isDeleted: 1, createdAt: -1 });
+
 blogSchema.pre('save', function (this: HydratedDocument<IBlog>) {
   if (this.isModified('title')) {
     this.slug = generateSlug(this.title);
