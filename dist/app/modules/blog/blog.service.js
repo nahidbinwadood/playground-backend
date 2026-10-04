@@ -31,8 +31,14 @@ const getAllBlogs = (_a) => __awaiter(void 0, [_a], void 0, function* ({ include
     return response;
 });
 // get all blogs==>
-const getSingleBlog = (slug) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield blog_model_1.Blog.findOne({ slug: slug });
+// Public by default: a draft (or deleted post) answers 404 exactly like a
+// missing slug. The admin edit page passes includeDrafts via GET /blogs/all/:slug.
+const getSingleBlog = (slug_1, ...args_1) => __awaiter(void 0, [slug_1, ...args_1], void 0, function* (slug, { includeDrafts = false } = {}) {
+    const filter = { slug, isDeleted: { $ne: true } };
+    if (!includeDrafts) {
+        filter.isPublished = true;
+    }
+    const response = yield blog_model_1.Blog.findOne(filter);
     if (response) {
         return response;
     }

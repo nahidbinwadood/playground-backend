@@ -17,7 +17,14 @@ router.get('/', BlogControllers.getAllBlogs);
 // Express doesn't match the literal "all" as a slug ==>
 router.get('/all', checkAuth('admin'), BlogControllers.getAllBlogsAdmin);
 
-// get single blog==>
+// get single blog including drafts — admin only (the edit page) ==>
+router.get(
+  '/all/:slug',
+  checkAuth('admin'),
+  BlogControllers.getSingleBlogAdmin
+);
+
+// get single blog — public: published only ==>
 router.get('/:slug', BlogControllers.getSingleBlog);
 
 // create blog==>

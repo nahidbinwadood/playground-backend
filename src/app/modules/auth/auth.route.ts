@@ -28,7 +28,9 @@ router.post(
 );
 
 // logout==>
-router.post('/logout', checkAuth(), AuthControllers.logOut);
+// no checkAuth: logging out only clears cookies, and it must keep working when
+// the access token has already expired
+router.post('/logout', AuthControllers.logOut);
 
 // get personal info==>
 router.get('/me', checkAuth(), AuthControllers.getProfile);

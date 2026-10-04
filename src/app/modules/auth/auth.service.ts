@@ -5,6 +5,11 @@ import httpStatusCode from 'http-status-codes';
 import bcrypt from 'bcryptjs';
 import { createNewAccessToken, generateToken } from '../../utils/jwt';
 import { envVars } from '../../config/env';
+import {
+  LOGIN_LOCK_WINDOW_SECONDS,
+  LoginAttempt,
+  MAX_FAILED_LOGINS,
+} from './auth.model';
 
 // create user==>
 const createUser = async (payload: Partial<IUser>) => {
@@ -32,28 +37,40 @@ const createUser = async (payload: Partial<IUser>) => {
 
 // login user==>
 const loginUser = async (payload: Partial<IUser>) => {
-  const isExist = await User.findOne({ email: payload.email });
+  const attemptEmail = String(payload.email ?? '').toLowerCase().trim();
 
-  // throw error is the email doest match==>
-  if (!isExist) {
+  // lockout: too many recent failures for this email ==>
+  const recentFailures = await LoginAttempt.countDocuments({
+    email: attemptEmail,
+    createdAt: { $gt: new Date(Date.now() - LOGIN_LOCK_WINDOW_SECONDS * 1000) },
+  });
+  if (recentFailures >= MAX_FAILED_LOGINS) {
     throw new AppError(
-      httpStatusCode.NOT_FOUND,
-      'No user found with this email'
+      httpStatusCode.TOO_MANY_REQUESTS,
+      'Too many failed attempts. Try again in 15 minutes.'
     );
   }
 
-  const passwordMatch = await bcrypt.compare(
-    payload.password as string,
-    isExist?.password as string
-  );
+  const isExist = await User.findOne({ email: payload.email });
 
-  // throw error if the password is not matched==>
-  if (!passwordMatch) {
+  const passwordMatch =
+    !!isExist &&
+    (await bcrypt.compare(
+      payload.password as string,
+      isExist?.password as string
+    ));
+
+  // Unknown email and wrong password get the same answer, so the login form
+  // cannot be used to discover which emails have accounts ==>
+  if (!isExist || !passwordMatch) {
+    await LoginAttempt.create({ email: attemptEmail });
     throw new AppError(
       httpStatusCode.BAD_REQUEST,
       'The email or password doesn’t seem right. Please double-check and try again 🔁'
     );
   }
+
+  await LoginAttempt.deleteMany({ email: attemptEmail });
 
   const { password, ...rest } = isExist.toObject();
 

@@ -30,6 +30,7 @@ const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jwt_1 = require("../../utils/jwt");
 const env_1 = require("../../config/env");
+const auth_model_1 = require("./auth.model");
 // create user==>
 const createUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const isExist = yield user_model_1.User.findOne({ email: payload.email });
@@ -46,17 +47,27 @@ const createUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
 });
 // login user==>
 const loginUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const isExist = yield user_model_1.User.findOne({ email: payload.email });
-    // throw error is the email doest match==>
-    if (!isExist) {
-        throw new appError_1.AppError(http_status_codes_1.default.NOT_FOUND, 'No user found with this email');
+    var _a;
+    const attemptEmail = String((_a = payload.email) !== null && _a !== void 0 ? _a : '').toLowerCase().trim();
+    // lockout: too many recent failures for this email ==>
+    const recentFailures = yield auth_model_1.LoginAttempt.countDocuments({
+        email: attemptEmail,
+        createdAt: { $gt: new Date(Date.now() - auth_model_1.LOGIN_LOCK_WINDOW_SECONDS * 1000) },
+    });
+    if (recentFailures >= auth_model_1.MAX_FAILED_LOGINS) {
+        throw new appError_1.AppError(http_status_codes_1.default.TOO_MANY_REQUESTS, 'Too many failed attempts. Try again in 15 minutes.');
     }
-    const passwordMatch = yield bcryptjs_1.default.compare(payload.password, isExist === null || isExist === void 0 ? void 0 : isExist.password);
-    // throw error if the password is not matched==>
-    if (!passwordMatch) {
+    const isExist = yield user_model_1.User.findOne({ email: payload.email });
+    const passwordMatch = !!isExist &&
+        (yield bcryptjs_1.default.compare(payload.password, isExist === null || isExist === void 0 ? void 0 : isExist.password));
+    // Unknown email and wrong password get the same answer, so the login form
+    // cannot be used to discover which emails have accounts ==>
+    if (!isExist || !passwordMatch) {
+        yield auth_model_1.LoginAttempt.create({ email: attemptEmail });
         throw new appError_1.AppError(http_status_codes_1.default.BAD_REQUEST, 'The email or password doesn’t seem right. Please double-check and try again 🔁');
     }
-    const _a = isExist.toObject(), { password } = _a, rest = __rest(_a, ["password"]);
+    yield auth_model_1.LoginAttempt.deleteMany({ email: attemptEmail });
+    const _b = isExist.toObject(), { password } = _b, rest = __rest(_b, ["password"]);
     const userTokens = (0, jwt_1.generateToken)(isExist);
     return Object.assign(Object.assign({}, rest), { tokens: {
             accessToken: userTokens === null || userTokens === void 0 ? void 0 : userTokens.accessToken,

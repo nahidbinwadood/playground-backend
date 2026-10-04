@@ -16,7 +16,9 @@ router.post('/create', (0, validateRequest_1.default)(userSchema_1.createUserSch
 // login==>
 router.post('/login', (0, validateRequest_1.default)(userSchema_1.loginUserSchema), auth_controller_1.AuthControllers.loginUser);
 // logout==>
-router.post('/logout', (0, checkAuth_1.default)(), auth_controller_1.AuthControllers.logOut);
+// no checkAuth: logging out only clears cookies, and it must keep working when
+// the access token has already expired
+router.post('/logout', auth_controller_1.AuthControllers.logOut);
 // get personal info==>
 router.get('/me', (0, checkAuth_1.default)(), auth_controller_1.AuthControllers.getProfile);
 // update profile==>

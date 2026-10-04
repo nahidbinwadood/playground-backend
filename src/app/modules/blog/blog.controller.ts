@@ -35,8 +35,10 @@ const getAllBlogsAdmin = catchAsync(
 );
 
 // get single blog==>
-const getSingleBlog = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
+// Same handler for the public route and the admin route; only the admin one
+// (behind checkAuth('admin')) may see drafts.
+const singleBlogHandler = (includeDrafts: boolean) =>
+  catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const slug = Array.isArray(req.params.slug)
       ? req.params.slug[0]
       : req.params.slug;
@@ -45,7 +47,7 @@ const getSingleBlog = catchAsync(
       throw new AppError(httpStatusCode.NOT_FOUND, 'Slug is required');
     }
 
-    const response = await BlogServices.getSingleBlog(slug);
+    const response = await BlogServices.getSingleBlog(slug, { includeDrafts });
 
     sendResponse(res, {
       success: true,
@@ -53,8 +55,10 @@ const getSingleBlog = catchAsync(
       message: 'Blog Data Fetched Successfully',
       data: response,
     });
-  }
-);
+  });
+
+const getSingleBlog = singleBlogHandler(false);
+const getSingleBlogAdmin = singleBlogHandler(true);
 
 // create blog==>
 const createBlog = catchAsync(
@@ -130,4 +134,5 @@ export const BlogControllers = {
   updateBlog,
   deleteBlog,
   getSingleBlog,
+  getSingleBlogAdmin,
 };

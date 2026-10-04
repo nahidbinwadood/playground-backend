@@ -40,14 +40,16 @@ const getAllBlogsAdmin = (0, catchAsync_1.default)((req, res, next) => __awaiter
     });
 }));
 // get single blog==>
-const getSingleBlog = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+// Same handler for the public route and the admin route; only the admin one
+// (behind checkAuth('admin')) may see drafts.
+const singleBlogHandler = (includeDrafts) => (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const slug = Array.isArray(req.params.slug)
         ? req.params.slug[0]
         : req.params.slug;
     if (!slug) {
         throw new appError_1.AppError(http_status_codes_1.default.NOT_FOUND, 'Slug is required');
     }
-    const response = yield blog_service_1.BlogServices.getSingleBlog(slug);
+    const response = yield blog_service_1.BlogServices.getSingleBlog(slug, { includeDrafts });
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.default.OK,
@@ -55,6 +57,8 @@ const getSingleBlog = (0, catchAsync_1.default)((req, res, next) => __awaiter(vo
         data: response,
     });
 }));
+const getSingleBlog = singleBlogHandler(false);
+const getSingleBlogAdmin = singleBlogHandler(true);
 // create blog==>
 const createBlog = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const response = yield blog_service_1.BlogServices.createBlog(req.body);
@@ -111,4 +115,5 @@ exports.BlogControllers = {
     updateBlog,
     deleteBlog,
     getSingleBlog,
+    getSingleBlogAdmin,
 };

@@ -16,7 +16,9 @@ router.get('/', blog_controller_1.BlogControllers.getAllBlogs);
 // get all blogs including drafts — admin only; declared BEFORE /:slug so
 // Express doesn't match the literal "all" as a slug ==>
 router.get('/all', (0, checkAuth_1.default)('admin'), blog_controller_1.BlogControllers.getAllBlogsAdmin);
-// get single blog==>
+// get single blog including drafts — admin only (the edit page) ==>
+router.get('/all/:slug', (0, checkAuth_1.default)('admin'), blog_controller_1.BlogControllers.getSingleBlogAdmin);
+// get single blog — public: published only ==>
 router.get('/:slug', blog_controller_1.BlogControllers.getSingleBlog);
 // create blog==>
 router.post('/create', (0, checkAuth_1.default)('admin'), multer_upload_1.default.single('coverImage'), (0, validateRequest_1.default)(blog_validation_1.createBlogValidationSchema, 'coverImage'), blog_controller_1.BlogControllers.createBlog);
