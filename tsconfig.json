@@ -109,5 +109,8 @@
     /* Completeness */
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
-  }
+  },
+  // only src/ is under rootDir; without this, any .ts outside it (e.g. a tests/
+  // folder) makes tsc fail with "not under rootDir" and breaks pnpm build
+  "include": ["src"]
 }
