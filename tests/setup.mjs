@@ -21,6 +21,12 @@ Object.assign(process.env, {
   TELEGRAM_CHAT_ID: 'test-chat-id',
   REMINDER_SECRET: 'test-secret',
   REMINDER_TZ: 'Asia/Dhaka',
+  // set explicitly so dotenv can't fill them from a local .env — a real key
+  // must never reach a test run. fetch is stubbed in every AI test anyway.
+  LLM_BASE_URL: 'https://llm.test/v1',
+  LLM_API_KEY: 'test-llm-key',
+  LLM_MODEL_STRONG: 'test/strong-model',
+  LLM_MODEL_FAST: 'test/fast-model',
 });
 // a local .env must not open the Vercel bearer path during tests
 delete process.env.CRON_SECRET;
