@@ -74,11 +74,17 @@ const requestCompletion = async ({
   system,
   user,
   maxTokens,
+  thinking,
 }: {
   model: string;
   system: string;
   user: string;
   maxTokens: number;
+  // DeepSeek turns thinking mode ON by default, and its reasoning tokens are
+  // billed as output. `false` disables it for cheap work, `true` keeps it for
+  // accuracy-sensitive work. Omitted (`undefined`) means the provider default.
+  // Only sent when set, so other OpenAI-compatible providers stay unaffected.
+  thinking?: boolean;
 }): Promise<string> => {
   let response: Response;
 
@@ -92,9 +98,12 @@ const requestCompletion = async ({
       },
       body: JSON.stringify({
         model,
-        // always cap it: without max_tokens OpenRouter reserves the model's
-        // full output budget and answers 402 on a small balance
+        // always cap it: without max_tokens some providers reserve the model's
+        // full output budget and answer 402 on a small balance
         max_tokens: maxTokens,
+        ...(thinking === undefined
+          ? {}
+          : { thinking: { type: thinking ? 'enabled' : 'disabled' } }),
         messages: [
           { role: 'system', content: system },
           { role: 'user', content: user },
@@ -135,11 +144,13 @@ export const chatJSON = async ({
   system,
   user,
   maxTokens = 2000,
+  thinking,
 }: {
   model: string;
   system: string;
   user: string;
   maxTokens?: number;
+  thinking?: boolean;
 }): Promise<unknown> => {
   if (!isLLMConfigured()) {
     throw new AppError(
@@ -149,7 +160,7 @@ export const chatJSON = async ({
   }
 
   const text = await withRetry(() =>
-    requestCompletion({ model, system, user, maxTokens })
+    requestCompletion({ model, system, user, maxTokens, thinking })
   );
 
   return extractJSON(text);

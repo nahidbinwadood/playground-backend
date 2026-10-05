@@ -49,6 +49,9 @@ const generateCards = async (noteId: string) => {
     model: requireModel(envVars.LLM_MODEL_FAST, 'LLM_MODEL_FAST'),
     system: `${CARDS_PROMPT}\n\n${CARDS_FORMAT}`,
     user: noteAsPrompt(note),
+    // cards are easy: skip thinking mode so reasoning tokens (billed as output)
+    // are not spent on a task a non-thinking model already does well
+    thinking: false,
   });
 
   return parseModelOutput(cardsResponseSchema, output);
@@ -63,9 +66,11 @@ const auditNote = async (noteId: string) => {
     model: requireModel(envVars.LLM_MODEL_STRONG, 'LLM_MODEL_STRONG'),
     system: `${AUDIT_PROMPT}\n\n${AUDIT_FORMAT}`,
     user: noteAsPrompt(note),
-    // reasoning models spend tokens thinking before they answer; 2000 left
-    // some of them with an empty reply in the eval
-    maxTokens: 4000,
+    // audits need accuracy: keep thinking mode on so the model reasons first
+    thinking: true,
+    // thinking tokens count toward max_tokens; give the model room to finish
+    // rather than return an empty reply after spending its budget reasoning
+    maxTokens: 8000,
   });
 
   return parseModelOutput(auditResponseSchema, output);
