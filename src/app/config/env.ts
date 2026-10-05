@@ -24,6 +24,13 @@ interface IEnvVariables {
   // <CRON_SECRET>` on cron invocations. Deliberately NOT required: local dev and
   // any non-Vercel host must keep booting without it.
   CRON_SECRET?: string;
+  // ai module — all optional. Without them the server still boots and the /ai
+  // routes answer 503 "AI is not configured". Any OpenAI-compatible provider
+  // works (OpenRouter, Groq, Gemini, Ollama); switching is an env change only.
+  LLM_BASE_URL?: string;
+  LLM_API_KEY?: string;
+  LLM_MODEL_STRONG?: string; // accuracy-sensitive work: note audits
+  LLM_MODEL_FAST?: string; // simple work: recall cards
 }
 
 const loadEnvironmentVariables = (): IEnvVariables => {
@@ -77,6 +84,10 @@ const loadEnvironmentVariables = (): IEnvVariables => {
     REMINDER_SECRET: process.env.REMINDER_SECRET as string,
     REMINDER_TZ: process.env.REMINDER_TZ as string,
     CRON_SECRET: process.env.CRON_SECRET,
+    LLM_BASE_URL: process.env.LLM_BASE_URL,
+    LLM_API_KEY: process.env.LLM_API_KEY,
+    LLM_MODEL_STRONG: process.env.LLM_MODEL_STRONG,
+    LLM_MODEL_FAST: process.env.LLM_MODEL_FAST,
   };
 };
 
